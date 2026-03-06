@@ -38,7 +38,6 @@ Official Malay (Bahasa Melayu) translation pack for Joomla! 5 CMS.
 ├── .github/workflows/               # GitHub Actions CI/CD
 ├── pkg_ms-MY.xml                    # Package manifest
 ├── script.php                       # Install/update script
-├── update_ms-MY.xml                 # Joomla update server
 ├── crowdin.yml                      # Crowdin configuration
 ├── build.sh                         # Build script (Linux/macOS/CI)
 └── build.ps1                        # Build script (Windows PowerShell)

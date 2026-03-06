@@ -28,6 +28,6 @@
 		<file type="language" client="api" id="ms-MY">api_ms-MY.zip</file>
 	</files>
 	<updateservers>
-		<server type="extension" name="Joomla ms-MY Language Update">https://raw.githubusercontent.com/zakiabdullah/joomla-ms-MY/main/update_ms-MY.xml</server>
+		<server type="collection" name="Joomla! Update Directory">https://update.joomla.org/language/translationlist_5.xml</server>
 	</updateservers>
 </extension>
