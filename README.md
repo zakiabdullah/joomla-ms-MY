@@ -1,50 +1,50 @@
-# Pakej Bahasa Melayu (ms-MY) untuk Joomla! 5
+# Malay (ms-MY) Language Pack for Joomla! 5
 
 [![Build Joomla Language Pack](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/build.yml/badge.svg)](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/build.yml)
 [![GitHub release](https://img.shields.io/github/v/release/zakiabdullah/joomla-ms-MY?color=green&include_prereleases&label=release&style=for-the-badge)](https://github.com/zakiabdullah/joomla-ms-MY/releases)
 
-Pakej terjemahan Bahasa Melayu rasmi untuk Joomla! 5 CMS.
+Official Malay (Bahasa Melayu) translation pack for Joomla! 5 CMS.
 
-## Maklumat
+## Information
 
 | | |
 |---|---|
-| **Bahasa** | Bahasa Melayu (ms-MY) |
-| **Tag Bahasa** | `ms-MY` / `ms_MY` |
-| **Versi Joomla** | 5.4.4 |
-| **Versi Pakej** | 5.4.4.1 |
-| **PHP Minimum** | 8.1.0 |
+| **Language** | Malay (ms-MY) |
+| **Language Tag** | `ms-MY` / `ms_MY` |
+| **Joomla Version** | 5.4.4 |
+| **Package Version** | 5.4.4.1 |
+| **Minimum PHP** | 8.1.0 |
 
-## Pemasangan
+## Installation
 
-### Melalui Pentadbir Joomla
-1. Log masuk ke Pentadbir Joomla
-2. Pergi ke **Sistem → Pasang → Bahasa**
-3. Cari "Malay" dan pasang
+### Via Joomla Administrator
+1. Log in to Joomla Administrator
+2. Go to **System → Install → Languages**
+3. Search for "Malay" and install
 
-### Muat Turun Manual
-1. Muat turun fail ZIP terkini dari [Releases](https://github.com/zakiabdullah/joomla-ms-MY/releases)
-2. Pergi ke **Sistem → Pasang → Sambungan**
-3. Muat naik fail ZIP dan pasang
-4. Aktifkan bahasa di **Sistem → Urus → Bahasa**
+### Manual Download
+1. Download the latest ZIP file from [Releases](https://github.com/zakiabdullah/joomla-ms-MY/releases)
+2. Go to **System → Install → Extensions**
+3. Upload the ZIP file and install
+4. Activate the language at **System → Manage → Languages**
 
-## Struktur Repositori
+## Repository Structure
 
 ```
-├── language/ms-MY/                  # Fail bahasa laman (site)
-├── administrator/language/ms-MY/    # Fail bahasa pentadbir (admin)
-├── api/language/ms-MY/              # Fail bahasa API
-├── installation/language/ms-MY/     # Fail bahasa pemasangan
+├── language/ms-MY/                  # Site frontend language files
+├── administrator/language/ms-MY/    # Administrator language files
+├── api/language/ms-MY/              # API language files
+├── installation/language/ms-MY/     # Installation language files
 ├── .github/workflows/               # GitHub Actions CI/CD
-├── pkg_ms-MY.xml                    # Manifes pakej
-├── script.php                       # Skrip pemasangan/kemaskini
-├── update_ms-MY.xml                 # Pelayan kemaskini Joomla
-├── crowdin.yml                      # Konfigurasi Crowdin
-├── build.sh                         # Skrip pembinaan (Linux/macOS/CI)
-└── build.ps1                        # Skrip pembinaan (Windows PowerShell)
+├── pkg_ms-MY.xml                    # Package manifest
+├── script.php                       # Install/update script
+├── update_ms-MY.xml                 # Joomla update server
+├── crowdin.yml                      # Crowdin configuration
+├── build.sh                         # Build script (Linux/macOS/CI)
+└── build.ps1                        # Build script (Windows PowerShell)
 ```
 
-## Pembinaan
+## Building
 
 ### Windows (PowerShell)
 ```powershell
@@ -57,31 +57,31 @@ chmod +x build.sh
 ./build.sh
 ```
 
-Fail output: `dist/ms-MY_joomla_lang_full_<version>.zip`
+Output: `dist/ms-MY_joomla_lang_full_<version>.zip`
 
-## Aliran Kerja CI/CD
+## CI/CD Workflow
 
 ### GitHub Actions
-- **Push ke `main`**: Bina pakej secara automatik dan muat naik sebagai artifact
-- **Tag baharu**: Bina pakej dan cipta GitHub Release secara automatik
+- **Push to `main`**: Automatically builds the package and uploads as artifact
+- **New tag**: Builds the package and creates a GitHub Release automatically
 
-### Cara Keluarkan Versi Baharu
+### Creating a New Release
 ```bash
 git tag -a 5.4.4v1 -m "Release 5.4.4v1"
 git push origin 5.4.4v1
 ```
 
 ### Crowdin
-Fail `crowdin.yml` membolehkan penyegerakan terjemahan dengan [Crowdin](https://crowdin.com):
-1. Cipta projek Crowdin
-2. Tetapkan bahasa sumber: English (en-GB)
-3. Tambah bahasa sasaran: Malay (ms-MY)
-4. Sambungkan repositori GitHub melalui integrasi Crowdin
+The `crowdin.yml` file enables translation synchronization with [Crowdin](https://crowdin.com):
+1. Create a Crowdin project
+2. Set source language: English (en-GB)
+3. Add target language: Malay (ms-MY)
+4. Connect the GitHub repository via Crowdin integration
 
-## Sumbangan
+## Contributing
 
-Sumbangan dialu-alukan! Sila buka [Issue](https://github.com/zakiabdullah/joomla-ms-MY/issues) atau hantar Pull Request.
+Contributions are welcome! Please open an [Issue](https://github.com/zakiabdullah/joomla-ms-MY/issues) or submit a Pull Request.
 
-## Lesen
+## License
 
-GNU General Public License versi 2 atau lebih baharu; lihat [LICENSE.txt](https://www.gnu.org/licenses/gpl-2.0.html)
+GNU General Public License version 2 or later; see [LICENSE.txt](https://www.gnu.org/licenses/gpl-2.0.html)
