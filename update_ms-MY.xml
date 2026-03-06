@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<updates>
+	<update>
+		<name>Malay (ms-MY) Language Pack</name>
+		<description>Pakej Bahasa Melayu (ms-MY) untuk Joomla! 5</description>
+		<element>pkg_ms-MY</element>
+		<type>package</type>
+		<version>5.4.4.1</version>
+		<tag>stable</tag>
+		<client>0</client>
+		<downloads>
+			<downloadurl type="full" format="zip">https://github.com/zakiabdullah/joomla-ms-MY/releases/download/5.4.4v1/ms-MY_joomla_lang_full_5.4.4.1.zip</downloadurl>
+		</downloads>
+		<targetplatform name="joomla" version="5\.[01234]" />
+		<php_minimum>8.1.0</php_minimum>
+	</update>
+</updates>
