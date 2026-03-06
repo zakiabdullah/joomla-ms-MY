@@ -35,28 +35,32 @@ Official Malay (Bahasa Melayu) translation pack for Joomla! 5 CMS.
 ├── administrator/language/ms-MY/    # Administrator language files
 ├── api/language/ms-MY/              # API language files
 ├── installation/language/ms-MY/     # Installation language files
+├── build/                           # Build scripts (J!German-style)
+│   ├── build.php                    # Package builder (CLI)
+│   └── bump.php                     # Version bumper (CLI)
 ├── .github/workflows/               # GitHub Actions CI/CD
 ├── pkg_ms-MY.xml                    # Package manifest
-├── script.php                       # Install/update script
-├── crowdin.yml                      # Crowdin configuration
-├── build.sh                         # Build script (Linux/macOS/CI)
-└── build.ps1                        # Build script (Windows PowerShell)
+└── script.php                       # Install/update script
 ```
 
 ## Building
 
-### Windows (PowerShell)
-```powershell
-.\build.ps1
-```
-
-### Linux / macOS / CI
+### Version Bump
 ```bash
-chmod +x build.sh
-./build.sh
+php build/bump.php -v 5.4.4 -l 1
 ```
 
-Output: `dist/ms-MY_joomla_lang_full_<version>.zip`
+### Build Language Pack
+```bash
+php build/build.php --lpackages --v
+```
+
+### Build from Specific Tag
+```bash
+php build/build.php --lpackages --v --tagversion "5.4.4v1"
+```
+
+Output: `build/tmp/packages/ms-MY_joomla_lang_full_<version>.zip`
 
 ## CI/CD Workflow
 
@@ -66,7 +70,16 @@ Output: `dist/ms-MY_joomla_lang_full_<version>.zip`
 
 ### Creating a New Release
 ```bash
+# 1. Bump version
+php build/bump.php -v 5.4.4 -l 1
+
+# 2. Commit changes
+git add -A
+git commit -m "release 5.4.4v1"
+
+# 3. Tag and push
 git tag -a 5.4.4v1 -m "Release 5.4.4v1"
+git push origin j5
 git push origin 5.4.4v1
 ```
 
