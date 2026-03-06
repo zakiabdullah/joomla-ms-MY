@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="package" method="upgrade">
+	<name>Malay (ms-MY) Language Pack</name>
+	<packagename>ms-MY</packagename>
+	<version>5.4.4.1</version>
+	<creationDate>2026-03</creationDate>
+	<author>Joomla! Malaysia</author>
+	<authorEmail>zaki@joomla.my</authorEmail>
+	<authorUrl>www.joomla.my</authorUrl>
+	<copyright>(C) 2026 Open Source Matters, Inc.</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<description>Pakej Bahasa Melayu (ms-MY) untuk Joomla! 5.4.4</description>
+	<files>
+		<file type="language" client="site" id="ms-MY">site_ms-MY.zip</file>
+		<file type="language" client="administrator" id="ms-MY">admin_ms-MY.zip</file>
+		<file type="language" client="api" id="ms-MY">api_ms-MY.zip</file>
+	</files>
+	<updateservers>
+	</updateservers>
+</extension>
