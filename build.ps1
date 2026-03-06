@@ -1,5 +1,5 @@
 # ============================================================
-# build.ps1 - Skrip Pembinaan Pakej Bahasa ms-MY Joomla 5
+# build.ps1 - Skrip Pembinaan Pakej Bahasa ms-MY Joomla 6
 # ============================================================
 # Penggunaan: .\build.ps1
 # Output: dist\ms-MY_joomla_lang_full_5.4.4v1.zip
@@ -8,8 +8,8 @@
 $ErrorActionPreference = "Stop"
 
 # --- Konfigurasi ---
-$version      = "5.4.4"
-$packVersion  = "5.4.4.1"
+$version      = "6.0.0"
+$packVersion  = "6.0.0.1"
 $creationDate = "2026-03"
 $author       = "Joomla! Malaysia"
 $authorEmail  = "zaki@joomla.my"

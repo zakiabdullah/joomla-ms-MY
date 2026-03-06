@@ -2,7 +2,7 @@
 <extension type="package" method="upgrade">
 	<name>Malay (ms-MY) Language Pack</name>
 	<packagename>ms-MY</packagename>
-	<version>5.4.4.1</version>
+	<version>6.0.0.1</version>
 	<creationDate>2026-03</creationDate>
 	<author>Joomla! Malaysia</author>
 	<authorEmail>zaki@joomla.my</authorEmail>
@@ -13,7 +13,7 @@
 	<copyright>(C) 2026 Joomla! Malaysia</copyright>
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
 	<description><![CDATA[
-		<h2>Pakej Bahasa Melayu (ms-MY) untuk Joomla! 5</h2>
+		<h2>Pakej Bahasa Melayu (ms-MY) untuk Joomla! 6</h2>
 		<h3>Pemasangan Baru / Kemaskini</h3>
 		<p>Pakej bahasa Melayu telah berjaya dipasang. Sila aktifkan bahasa ini melalui <strong>Sistem → Urus → Bahasa</strong>.</p>
 		<h3>Ralat Pemasangan</h3>
@@ -28,6 +28,6 @@
 		<file type="language" client="api" id="ms-MY">api_ms-MY.zip</file>
 	</files>
 	<updateservers>
-		<server type="collection" name="Joomla! Update Directory">https://update.joomla.org/language/translationlist_5.xml</server>
+		<server type="collection" name="Joomla! Update Directory">https://update.joomla.org/language/translationlist_6.xml</server>
 	</updateservers>
 </extension>

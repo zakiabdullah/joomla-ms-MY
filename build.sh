@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-# build.sh - Skrip Pembinaan Pakej Bahasa ms-MY Joomla 5
+# build.sh - Skrip Pembinaan Pakej Bahasa ms-MY Joomla 6
 # ============================================================
 # Penggunaan: ./build.sh
 # Output: dist/ms-MY_joomla_lang_full_<version>.zip

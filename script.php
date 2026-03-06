@@ -14,18 +14,18 @@ use Joomla\CMS\Installer\InstallerScript;
 /**
  * Installation class to perform additional changes during install/uninstall/update
  *
- * @since  5.4.4v1
+ * @since  6.0.0v1
  */
 class Pkg_msMYInstallerScript extends InstallerScript
 {
 	/**
 	 * Extension script constructor.
 	 *
-	 * @since   5.4.4v1
+	 * @since   6.0.0v1
 	 */
 	public function __construct()
 	{
-		$this->minimumJoomla = '5.0';
-		$this->minimumPhp    = '8.1.0';
+		$this->minimumJoomla = '6.0';
+		$this->minimumPhp    = '8.2.0';
 	}
 }
