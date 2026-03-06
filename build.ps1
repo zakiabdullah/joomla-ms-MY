@@ -18,7 +18,6 @@ $copyright    = "(C) 2026 Open Source Matters, Inc."
 $license      = "GNU General Public License version 2 or later; see LICENSE.txt"
 
 $rootDir  = $PSScriptRoot
-$srcDir   = Join-Path $rootDir "joomla5"
 $distDir  = Join-Path $rootDir "dist"
 $tempDir  = Join-Path $rootDir "_build_temp"
 
@@ -78,7 +77,7 @@ $sections = @(
     @{
         Name        = "site"
         Client      = "site"
-        SourceDir   = Join-Path $srcDir "site\language\ms-MY"
+        SourceDir   = Join-Path $rootDir "language\ms-MY"
         ZipName     = "site_ms-MY.zip"
         Description = "Pakej Bahasa Melayu (ms-MY) - Laman"
         CopyYear    = "2013"
@@ -86,7 +85,7 @@ $sections = @(
     @{
         Name        = "admin"
         Client      = "administrator"
-        SourceDir   = Join-Path $srcDir "administrator\language\ms-MY"
+        SourceDir   = Join-Path $rootDir "administrator\language\ms-MY"
         ZipName     = "admin_ms-MY.zip"
         Description = "Pakej Bahasa Melayu (ms-MY) - Pentadbir"
         CopyYear    = "2013"
@@ -94,7 +93,7 @@ $sections = @(
     @{
         Name        = "api"
         Client      = "api"
-        SourceDir   = Join-Path $srcDir "api\language\ms-MY"
+        SourceDir   = Join-Path $rootDir "api\language\ms-MY"
         ZipName     = "api_ms-MY.zip"
         Description = "Pakej Bahasa Melayu (ms-MY) - API"
         CopyYear    = "2020"
@@ -135,8 +134,9 @@ foreach ($section in $sections) {
 Write-Host ""
 Write-Host "Mencipta pakej utama..." -ForegroundColor Yellow
 
-# Salin pkg_ms-MY.xml ke temp
+# Salin pkg_ms-MY.xml dan script.php ke temp
 Copy-Item (Join-Path $rootDir "pkg_ms-MY.xml") -Destination $tempDir
+Copy-Item (Join-Path $rootDir "script.php") -Destination $tempDir
 
 $packageName = "ms-MY_joomla_lang_full_${packVersion}.zip"
 $packagePath = Join-Path $distDir $packageName
