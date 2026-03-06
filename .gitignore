@@ -1,6 +1,7 @@
 # Build output
 dist/
 _build_temp/
+build/tmp/
 
 # OS files
 Thumbs.db
