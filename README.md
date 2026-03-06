@@ -83,13 +83,6 @@ git push origin j5
 git push origin 5.4.4v1
 ```
 
-### Crowdin
-The `crowdin.yml` file enables translation synchronization with [Crowdin](https://crowdin.com):
-1. Create a Crowdin project
-2. Set source language: English (en-GB)
-3. Add target language: Malay (ms-MY)
-4. Connect the GitHub repository via Crowdin integration
-
 ## Contributing
 
 Contributions are welcome! Please open an [Issue](https://github.com/zakiabdullah/joomla-ms-MY/issues) or submit a Pull Request.
