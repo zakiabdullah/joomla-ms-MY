@@ -1,9 +1,9 @@
-# Malay (ms-MY) Language Pack for Joomla! 5
+# Malay (ms-MY) Language Pack for Joomla! 6
 
 [![Build Joomla Language Pack](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/build.yml/badge.svg)](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/build.yml)
 [![GitHub release](https://img.shields.io/github/v/release/zakiabdullah/joomla-ms-MY?color=green&include_prereleases&label=release&style=for-the-badge)](https://github.com/zakiabdullah/joomla-ms-MY/releases)
 
-Official Malay (Bahasa Melayu) translation pack for Joomla! 5 CMS.
+Official Malay (Bahasa Melayu) translation pack for Joomla! 6 CMS.
 
 ## Information
 
@@ -11,9 +11,9 @@ Official Malay (Bahasa Melayu) translation pack for Joomla! 5 CMS.
 |---|---|
 | **Language** | Malay (ms-MY) |
 | **Language Tag** | `ms-MY` / `ms_MY` |
-| **Joomla Version** | 5.4.4 |
-| **Package Version** | 5.4.4.1 |
-| **Minimum PHP** | 8.1.0 |
+| **Joomla Version** | 6.0.0 |
+| **Package Version** | 6.0.0.1 |
+| **Minimum PHP** | 8.2.0 |
 
 ## Installation
 
@@ -61,7 +61,7 @@ Output: `dist/ms-MY_joomla_lang_full_<version>.zip`
 ## CI/CD Workflow
 
 ### GitHub Actions
-- **Push to `main`**: Automatically builds the package and uploads as artifact
+- **Push to `j5`/`j6`**: Automatically builds the package and uploads as artifact
 - **New tag**: Builds the package and creates a GitHub Release automatically
 
 ### Creating a New Release
