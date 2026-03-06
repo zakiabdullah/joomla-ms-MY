@@ -61,7 +61,7 @@ Output: `dist/ms-MY_joomla_lang_full_<version>.zip`
 ## CI/CD Workflow
 
 ### GitHub Actions
-- **Push to `main`**: Automatically builds the package and uploads as artifact
+- **Push to `j5`/`j6`**: Automatically builds the package and uploads as artifact
 - **New tag**: Builds the package and creates a GitHub Release automatically
 
 ### Creating a New Release
