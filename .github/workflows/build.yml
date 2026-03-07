@@ -7,9 +7,6 @@ on:
   pull_request:
     branches: [j5, j6]
 
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
