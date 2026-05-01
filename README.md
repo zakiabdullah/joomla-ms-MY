@@ -1,9 +1,9 @@
-# Malay (ms-MY) Language Pack for Joomla! 5
+# Malay (ms-MY) Language Pack for Joomla! 5 and 6
 
 [![Build Joomla Language Pack](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/build.yml/badge.svg)](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/build.yml)
 [![GitHub release](https://img.shields.io/github/v/release/zakiabdullah/joomla-ms-MY?color=green&include_prereleases&label=release&style=for-the-badge)](https://github.com/zakiabdullah/joomla-ms-MY/releases)
 
-Official Malay (Bahasa Melayu) translation pack for Joomla! 5 CMS.
+Official Malay (Bahasa Melayu) translation pack for Joomla! CMS.
 
 ## Information
 
@@ -11,8 +11,8 @@ Official Malay (Bahasa Melayu) translation pack for Joomla! 5 CMS.
 |---|---|
 | **Language** | Malay (ms-MY) |
 | **Language Tag** | `ms-MY` / `ms_MY` |
-| **Joomla Version** | 5.4.4 |
-| **Package Version** | 5.4.4.1 |
+| **Joomla Version** | 5.x and 6.x |
+| **Package Version** | Config-driven (see `build/build.config.json`) |
 | **Minimum PHP** | 8.1.0 |
 
 ## Installation
@@ -35,9 +35,11 @@ Official Malay (Bahasa Melayu) translation pack for Joomla! 5 CMS.
 ├── administrator/language/ms-MY/    # Administrator language files
 ├── api/language/ms-MY/              # API language files
 ├── installation/language/ms-MY/     # Installation language files
-├── build/                           # Build scripts (J!German-style)
+├── build/                           # Build config and legacy PHP scripts
+│   ├── build.config.json            # Dual-target build configuration
 │   ├── build.php                    # Package builder (CLI)
 │   └── bump.php                     # Version bumper (CLI)
+├── build.ps1                        # PowerShell dual-target build pipeline
 ├── .github/workflows/               # GitHub Actions CI/CD
 ├── pkg_ms-MY.xml                    # Package manifest
 └── script.php                       # Install/update script
@@ -45,17 +47,46 @@ Official Malay (Bahasa Melayu) translation pack for Joomla! 5 CMS.
 
 ## Building
 
-### Version Bump
+### PowerShell (Windows)
+```powershell
+# Build all enabled targets from build/build.config.json
+./build.ps1
+
+# Use a custom config file
+./build.ps1 -ConfigPath build/build.config.json
+
+# Clean generated folders only
+./build.ps1 -CleanOnly
+
+# Build without XML/zip validation checks
+./build.ps1 -SkipValidation
+```
+
+Optional flags:
+- `-ConfigPath` points to a JSON config with target versions and metadata
+- `-CleanOnly` removes `build/joomla5`, `build/joomla6`, and `dist` then exits
+- `-SkipValidation` skips XML parse and non-empty zip checks
+
+Output:
+- `build/joomla5` (staging + sub-packages)
+- `build/joomla6` (staging + sub-packages)
+- `dist/pkg_ms-MY_j5.zip`
+- `dist/pkg_ms-MY_j6.zip`
+
+### Legacy PHP Helpers
+These scripts are still available if you need the old flow.
+
+#### Version Bump
 ```bash
 php build/bump.php -v 5.4.4 -l 1
 ```
 
-### Build Language Pack
+#### Build Language Pack
 ```bash
 php build/build.php --lpackages --v
 ```
 
-### Build from Specific Tag
+#### Build from Specific Tag
 ```bash
 php build/build.php --lpackages --v --tagversion "5.4.4v1"
 ```

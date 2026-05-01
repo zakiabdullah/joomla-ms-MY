@@ -1,0 +1,28 @@
+{
+  "languageTag": "ms-MY",
+  "languageName": "Malay (ms-MY) Language Pack",
+  "author": "Joomla! Malaysia",
+  "authorEmail": "zaki@joomla.my",
+  "authorUrl": "https://www.joomla.my",
+  "url": "https://github.com/zakiabdullah/joomla-ms-MY",
+  "packager": "Joomla! Malaysia",
+  "packagerUrl": "https://www.joomla.my",
+  "copyright": "(C) 2026 Joomla! Malaysia",
+  "license": "GNU General Public License version 2 or later; see LICENSE.txt",
+  "packageBaseName": "ms-MY",
+  "minimumPhp": "8.1.0",
+  "targets": [
+    {
+      "key": "j5",
+      "joomlaMajor": 5,
+      "packageVersion": "5.4.3.1",
+      "enabled": true
+    },
+    {
+      "key": "j6",
+      "joomlaMajor": 6,
+      "packageVersion": "6.0.0.1",
+      "enabled": true
+    }
+  ]
+}
