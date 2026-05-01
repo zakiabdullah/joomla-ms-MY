@@ -15,6 +15,15 @@ Official Malay (Bahasa Melayu) translation pack for Joomla! CMS.
 | **Package Version** | Config-driven (see `build/build.config.json`) |
 | **Minimum PHP** | 8.1.0 |
 
+## Active Target Versions
+
+Current enabled targets in `build/build.config.json`:
+
+| Target | Joomla Major | Package Version | Final Artifact |
+|---|---:|---:|---|
+| `j5` | 5 | 5.4.3.1 | `dist/pkg_ms-MY_j5.zip` |
+| `j6` | 6 | 6.0.0.1 | `dist/pkg_ms-MY_j6.zip` |
+
 ## Installation
 
 ### Via Joomla Administrator
@@ -113,6 +122,10 @@ git tag -a 5.4.4v1 -m "Release 5.4.4v1"
 git push origin j5
 git push origin 5.4.4v1
 ```
+
+## Release Notes Template
+
+Use [RELEASE_NOTES_TEMPLATE.md](RELEASE_NOTES_TEMPLATE.md) to prepare release notes for both `j5` and `j6` artifacts.
 
 ## Contributing
 
