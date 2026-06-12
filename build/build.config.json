@@ -15,13 +15,13 @@
     {
       "key": "j5",
       "joomlaMajor": 5,
-      "packageVersion": "5.4.5.1",
+      "packageVersion": "5.4.6.1",
       "enabled": true
     },
     {
       "key": "j6",
       "joomlaMajor": 6,
-      "packageVersion": "6.1.0.1",
+      "packageVersion": "6.1.1.1",
       "enabled": true
     }
   ]

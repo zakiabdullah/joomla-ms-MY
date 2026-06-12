@@ -669,8 +669,16 @@ try {
     Write-Log -Level INFO -Message 'Build complete for all targets.'
     Write-Log -Level INFO -Message 'Output files:'
 
-    Get-ChildItem -Path $distRoot -Filter '*.zip' | Sort-Object Name | ForEach-Object {
-        Write-Host (" - {0} ({1:N1} KB)" -f $_.Name, ($_.Length / 1KB))
+    $zipFiles = Get-ChildItem -Path $distRoot -Filter '*.zip' | Sort-Object Name
+
+    foreach ($file in $zipFiles) {
+        Write-Host (" - {0} ({1:N1} KB)" -f $file.Name, ($file.Length / 1KB))
+    }
+
+    Write-Log -Level INFO -Message 'SHA256 Checksums:'
+    foreach ($file in $zipFiles) {
+        $hash = (Get-FileHash -Path $file.FullName -Algorithm SHA256).Hash
+        Write-Host ("{0,-20} {1}" -f $file.Name, $hash)
     }
 }
 finally {
