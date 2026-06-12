@@ -8,6 +8,7 @@
 	<authorEmail>zaki@joomla.my</authorEmail>
 	<authorUrl>https://www.joomla.my</authorUrl>
 	<url>https://github.com/zakiabdullah/joomla-ms-MY</url>
+	<url>https://github.com/ahmadzakiabdullah/joomla-ms-MY</url>
 	<packager>Joomla! Malaysia</packager>
 	<packagerurl>https://www.joomla.my</packagerurl>
 	<copyright>(C) 2026 Joomla! Malaysia</copyright>
@@ -19,6 +20,8 @@
 		<h3>Ralat Pemasangan</h3>
 		<p>Jika pemasangan gagal, sila muat turun versi terkini dari <a href="https://github.com/zakiabdullah/joomla-ms-MY/releases" target="_blank">GitHub Releases</a>.</p>
 		<p>Laporkan masalah di <a href="https://github.com/zakiabdullah/joomla-ms-MY/issues" target="_blank">GitHub Issues</a>.</p>
+		<p>Jika pemasangan gagal, sila muat turun versi terkini dari <a href="https://github.com/ahmadzakiabdullah/joomla-ms-MY/releases" target="_blank">GitHub Releases</a>.</p>
+		<p>Laporkan masalah di <a href="https://github.com/ahmadzakiabdullah/joomla-ms-MY/issues" target="_blank">GitHub Issues</a>.</p>
 	]]></description>
 	<scriptfile>script.php</scriptfile>
 	<blockChildUninstall>true</blockChildUninstall>
