@@ -1,0 +1,46 @@
+name: Lint Joomla INI Files
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    paths:
+      - '**.ini'
+  pull_request:
+    branches: [ "main", "master" ]
+    paths:
+      - '**.ini'
+
+jobs:
+  lint:
+    name: Semak Sintaks INI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Sahkan fail-fail INI
+        run: |
+          php -r '
+            $errors = 0;
+            $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator("."));
+            foreach ($files as $file) {
+              if ($file->getExtension() === "ini") {
+                $parsed = parse_ini_file($file->getRealPath());
+                if ($parsed === false) {
+                  echo "❌ Ralat sintaks ditemui dalam: " . $file->getRealPath() . "\n";
+                  $errors++;
+                }
+              }
+            }
+            if ($errors > 0) {
+              echo "\nSila perbaiki ralat sintaks pada fail-fail di atas.";
+              exit(1);
+            }
+            echo "\n✅ Semua fail .ini berada dalam keadaan baik dan bebas ralat!";
+            exit(0);
+          '
