@@ -1,0 +1,78 @@
+name: Sync Check with Joomla CMS
+
+on:
+  schedule:
+    # Berjalan secara automatik setiap hari Ahad jam 12:00 AM UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+    # Membenarkan anda mencetuskan aliran kerja ini secara manual dari tab Actions
+    inputs:
+      joomla_branch:
+        description: 'Cabang (branch) joomla-cms untuk disemak (cth: 5.2-dev, 6.0-dev)'
+        required: true
+        default: '5.2-dev'
+
+jobs:
+  compare-translations:
+    name: Bandingkan fail .ini dengan Joomla Rasmi
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Semak keluar (Checkout) repositori ms-MY
+        uses: actions/checkout@v4
+        with:
+          path: joomla-ms-MY
+
+      - name: Semak keluar (Checkout) repositori joomla-cms
+        uses: actions/checkout@v4
+        with:
+          repository: joomla/joomla-cms
+          ref: ${{ github.event.inputs.joomla_branch || '5.2-dev' }}
+          path: joomla-cms
+
+      - name: Jalankan Perbandingan INI
+        shell: pwsh
+        run: |
+          $sections = @(
+              "language",
+              "administrator/language",
+              "api/language",
+              "installation/language"
+          )
+          
+          $missingKeysFound = $false
+
+          foreach ($section in $sections) {
+              $enDir = "joomla-cms/$section/en-GB"
+              $myDir = "joomla-ms-MY/$section/ms-MY"
+              
+              if (-not (Test-Path $enDir)) { continue }
+              
+              $enFiles = Get-ChildItem -Path $enDir -Filter "*.ini"
+              foreach ($enFile in $enFiles) {
+                  $myFileName = $enFile.Name -replace 'en-GB', 'ms-MY'
+                  $myFilePath = Join-Path $myDir $myFileName
+                  
+                  if (Test-Path $myFilePath) {
+                      # Tangkap amaran (Warning stream 3) dari skrip compare-ini.ps1
+                      $result = joomla-ms-MY/build/compare-ini.ps1 -EnGbFilePath $enFile.FullName -MsMyFilePath $myFilePath 3>&1
+                      
+                      if ($result -match "kunci yang hilang") {
+                          Write-Host "::group::Perbezaan ditemui dalam $myFileName"
+                          Write-Host ($result | Out-String)
+                          Write-Host "::endgroup::"
+                          $missingKeysFound = $true
+                      }
+                  } else {
+                      Write-Host "::warning title=Fail Hilang::Fail $myFileName tidak wujud dalam terjemahan ms-MY."
+                      $missingKeysFound = $true
+                  }
+              }
+          }
+
+          if ($missingKeysFound) {
+              Write-Host "::error title=Terjemahan Tidak Lengkap::Terdapat kunci terjemahan atau fail yang tertinggal. Sila semak log di atas."
+              exit 1
+          } else {
+              Write-Host "Hebat! Semua terjemahan adalah lengkap dan sejajar dengan en-GB."
+          }

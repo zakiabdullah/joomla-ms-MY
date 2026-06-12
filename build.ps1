@@ -669,8 +669,34 @@ try {
     Write-Log -Level INFO -Message 'Build complete for all targets.'
     Write-Log -Level INFO -Message 'Output files:'
 
-    Get-ChildItem -Path $distRoot -Filter '*.zip' | Sort-Object Name | ForEach-Object {
-        Write-Host (" - {0} ({1:N1} KB)" -f $_.Name, ($_.Length / 1KB))
+    $zipFiles = Get-ChildItem -Path $distRoot -Filter '*.zip' | Sort-Object Name
+
+    foreach ($file in $zipFiles) {
+        Write-Host (" - {0} ({1:N1} KB)" -f $file.Name, ($file.Length / 1KB))
+    }
+
+    Write-Log -Level INFO -Message 'SHA256 Checksums:'
+    
+    $notesPath = Join-Path $repoRoot 'RELEASE_NOTES_DRAFT.md'
+    $updateNotes = Test-Path -Path $notesPath
+    if ($updateNotes) {
+        $notesContent = Get-Content -Path $notesPath -Raw -Encoding UTF8
+    }
+
+    foreach ($file in $zipFiles) {
+        $hash = (Get-FileHash -Path $file.FullName -Algorithm SHA256).Hash
+        Write-Host ("{0,-20} {1}" -f $file.Name, $hash)
+
+        if ($updateNotes) {
+            # Gunakan Regex untuk menggantikan nilai di baris SHA256 bagi setiap fail
+            $pattern = "(?i)(###\s+$([regex]::Escape($file.Name))\s*\r?\n-\s*SHA256:\s*)[^\r\n]*"
+            $notesContent = [regex]::Replace($notesContent, $pattern, "`${1}$hash")
+        }
+    }
+
+    if ($updateNotes) {
+        Set-Content -Path $notesPath -Value $notesContent -Encoding UTF8
+        Write-Log -Level INFO -Message 'Updated checksums automatically in RELEASE_NOTES_DRAFT.md'
     }
 }
 finally {

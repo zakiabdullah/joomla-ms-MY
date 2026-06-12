@@ -21,8 +21,8 @@ Current enabled targets in `build/build.config.json`:
 
 | Target | Joomla Major | Package Version | Final Artifact |
 |---|---:|---:|---|
-| `j5` | 5 | 5.4.5.1 | `dist/pkg_ms-MY_j5.zip` |
-| `j6` | 6 | 6.1.0.1 | `dist/pkg_ms-MY_j6.zip` |
+| `j5` | 5 | 5.4.6.1 | `dist/pkg_ms-MY_j5.zip` |
+| `j6` | 6 | 6.1.1.1 | `dist/pkg_ms-MY_j6.zip` |
 
 ## Installation
 
@@ -87,7 +87,7 @@ These scripts are still available if you need the old flow.
 
 #### Version Bump
 ```bash
-php build/bump.php -v 5.4.5 -l 1
+php build/bump.php -v 5.4.6 -l 1
 ```
 
 #### Build Language Pack
