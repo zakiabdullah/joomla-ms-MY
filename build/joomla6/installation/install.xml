@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension client="installation" type="language" method="upgrade">
+	<name>Malay (ms-MY)</name>
+	<tag>ms-MY</tag>
+	<version>6.1.2.1</version>
+	<creationDate>2026-07-08</creationDate>
+	<author>Ahmad Zaki Abdullah</author>
+	<authorEmail>zaki@joomla.my</authorEmail>
+	<authorUrl>https://www.joomla.my</authorUrl>
+	<copyright>(C) 2026 Joomla! Malaysia</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<description>Malay (ms-MY) - Installation</description>
+	<files>
+		<filename file="meta">install.xml</filename>
+		<filename file="meta">langmetadata.xml</filename>
+		<folder>installation</folder>
+	</files>
+	<params />
+</extension>

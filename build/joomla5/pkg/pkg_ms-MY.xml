@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="package" method="upgrade">
+	<name>Malay (ms-MY) Language Pack</name>
+	<packagename>ms-MY</packagename>
+	<version>5.4.6.1</version>
+	<creationDate>2026-06-12</creationDate>
+	<author>Ahmad Zaki Abdullah</author>
+	<authorEmail>zaki@joomla.my</authorEmail>
+	<authorUrl>https://www.joomla.my</authorUrl>
+	<url>https://github.com/zakiabdullah/joomla-ms-MY</url>
+	<packager>Joomla! Malaysia</packager>
+	<packagerurl>https://www.joomla.my</packagerurl>
+	<copyright>(C) 2026 Joomla! Malaysia</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<description><![CDATA[
+        <h2>Malay Language Pack (ms-MY) for Joomla! 5</h2>
+        <h3>Installation / Update</h3>
+        <p>The Malay language pack has been installed successfully. Enable it via <strong>System -> Manage -> Languages</strong>.</p>
+        <h3>Installation Error</h3>
+        <p>If installation fails, download the latest package from <a href="https://github.com/zakiabdullah/joomla-ms-MY/releases" target="_blank">GitHub Releases</a>.</p>
+        <p>Report issues at <a href="https://github.com/zakiabdullah/joomla-ms-MY/issues" target="_blank">GitHub Issues</a>.</p>
+]]></description>
+	<scriptfile>script.php</scriptfile>
+	<blockChildUninstall>true</blockChildUninstall>
+	<files>
+		<file type="language" client="site" id="ms-MY">site_ms-MY.zip</file>
+		<file type="language" client="administrator" id="ms-MY">admin_ms-MY.zip</file>
+		<file type="language" client="api" id="ms-MY">api_ms-MY.zip</file>
+		<file type="language" client="installation" id="ms-MY">installation_ms-MY.zip</file>
+	</files>
+	<updateservers>
+		<server type="collection" name="Joomla! Update Directory">https://update.joomla.org/language/translationlist_5.xml</server>
+	</updateservers>
+</extension>
