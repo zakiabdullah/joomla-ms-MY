@@ -8,9 +8,9 @@ on:
     # Membenarkan anda mencetuskan aliran kerja ini secara manual dari tab Actions
     inputs:
       joomla_branch:
-        description: 'Cabang (branch) joomla-cms untuk disemak (cth: 5.2-dev, 6.0-dev)'
+        description: 'Cabang (branch) joomla-cms untuk disemak (cth: 5.4-dev, 6.1-dev)'
         required: true
-        default: '5.2-dev'
+        default: '5.4-dev'
 
 jobs:
   compare-translations:
@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: joomla/joomla-cms
-          ref: ${{ github.event.inputs.joomla_branch || '5.2-dev' }}
+          ref: ${{ github.event.inputs.joomla_branch || '5.4-dev' }}
           path: joomla-cms
 
       - name: Jalankan Perbandingan INI
