@@ -21,8 +21,8 @@ Current enabled targets in `build/build.config.json`:
 
 | Target | Joomla Major | Package Version | Final Artifact |
 |---|---:|---:|---|
-| `j5` | 5 | 5.4.7.1 | `dist/pkg_ms-MY_j5.zip` |
-| `j6` | 6 | 6.1.2.1 | `dist/pkg_ms-MY_j6.zip` |
+| `j5` | 5 | 5.4.8.1 | `dist/pkg_ms-MY_j5.zip` |
+| `j6` | 6 | 6.1.3.1 | `dist/pkg_ms-MY_j6.zip` |
 
 ## Installation
 
