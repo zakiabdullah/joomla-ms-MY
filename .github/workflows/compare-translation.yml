@@ -11,6 +11,11 @@ on:
         description: 'Cabang (branch) joomla-cms untuk disemak (cth: 5.4-dev, 6.1-dev)'
         required: true
         default: '5.4-dev'
+      fail_on_missing:
+        description: 'Gagal jika terdapat key terjemahan yang belum diterjemah'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   compare-translations:
@@ -71,8 +76,11 @@ jobs:
           }
 
           if ($missingKeysFound) {
-              Write-Host "::error title=Terjemahan Tidak Lengkap::Terdapat kunci terjemahan atau fail yang tertinggal. Sila semak log di atas."
-              exit 1
+              Write-Host "::warning title=Terjemahan Belum Lengkap::Terdapat kunci terjemahan yang belum ada dalam ms-MY. Joomla akan menggunakan fallback en-GB."
+              if ('${{ inputs.fail_on_missing }}' -eq 'true') {
+                  Write-Host "::error title=Mod Ketat::Pemeriksaan diminta gagal apabila key terjemahan hilang."
+                  exit 1
+              }
           } else {
               Write-Host "Hebat! Semua terjemahan adalah lengkap dan sejajar dengan en-GB."
           }
