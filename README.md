@@ -87,7 +87,7 @@ These scripts are still available if you need the old flow.
 
 #### Version Bump
 ```bash
-php build/bump.php -v 5.4.7 -l 1
+php build/bump.php -v 5.4.8 -l 1
 ```
 
 #### Build Language Pack
@@ -111,16 +111,16 @@ Output: `build/tmp/packages/ms-MY_joomla_lang_full_<version>.zip`
 ### Creating a New Release
 ```bash
 # 1. Bump version
-php build/bump.php -v 5.4.7 -l 1
+php build/bump.php -v 5.4.8 -l 1
 
 # 2. Commit changes
 git add -A
 git commit -m "release 5.4.5v1"
 
 # 3. Tag and push
-git tag -a 5.4.7v1 -m "Release 5.4.7v1"
+git tag -a 5.4.8v1 -m "Release 5.4.8v1"
 git push upstream j5
-git push upstream 5.4.7v1
+git push upstream 5.4.8v1
 
 ```
 
