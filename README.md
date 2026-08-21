@@ -11,8 +11,8 @@ Official Malay (Bahasa Melayu) translation pack for Joomla! 6 CMS.
 |---|---|
 | **Language** | Malay (ms-MY) |
 | **Language Tag** | `ms-MY` / `ms_MY` |
-| **Joomla Version** | 6.1.2 |
-| **Package Version** | 6.1.2.1 |
+| **Joomla Version** | 6.1.3 |
+| **Package Version** | 6.1.3.1 |
 | **Minimum PHP** | 8.2.0 |
 
 ## Installation
@@ -47,7 +47,7 @@ Official Malay (Bahasa Melayu) translation pack for Joomla! 6 CMS.
 
 ### Version Bump
 ```bash
-php build/bump.php -v 6.1.2 -l 1
+php build/bump.php -v 6.1.3 -l 1
 ```
 
 ### Build Language Pack
@@ -57,7 +57,7 @@ php build/build.php --lpackages --v
 
 ### Build from Specific Tag
 ```bash
-php build/build.php --lpackages --v --tagversion "6.1.2v1"
+php build/build.php --lpackages --v --tagversion "6.1.3v1"
 ```
 
 Output: `build/tmp/packages/ms-MY_joomla_lang_full_<version>.zip`
@@ -71,16 +71,16 @@ Output: `build/tmp/packages/ms-MY_joomla_lang_full_<version>.zip`
 ### Creating a New Release
 ```bash
 # 1. Bump version
-php build/bump.php -v 6.1.2 -l 1
+php build/bump.php -v 6.1.3 -l 1
 
 # 2. Commit changes
 git add -A
 git commit -m "release 5.4.4v1"
 
 # 3. Tag and push
-git tag -a 6.1.2v1 -m "Release 6.1.2v1"
+git tag -a 6.1.3v1 -m "Release 6.1.3v1"
 git push upstream j6
-git push upstream 6.1.2v1
+git push upstream 6.1.3v1
 ```
 
 ## Contributing
