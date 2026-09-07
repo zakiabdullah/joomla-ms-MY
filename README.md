@@ -24,6 +24,10 @@ Current enabled targets in `build/build.config.json`:
 | `j5` | 5 | 5.4.8.1 | `dist/pkg_ms-MY_j5.zip` |
 | `j6` | 6 | 6.1.3.1 | `dist/pkg_ms-MY_j6.zip` |
 
+The `j5` and `j6` branches are maintained separately. The current working
+branch is the Joomla 5 release line; build both packages locally with
+`build.ps1` and use the package matching the Joomla major version.
+
 ## Installation
 
 ### Via Joomla Administrator
@@ -107,6 +111,9 @@ Output: `build/tmp/packages/ms-MY_joomla_lang_full_<version>.zip`
 ### GitHub Actions
 - **Push to `j5`/`j6`**: Automatically builds the package and uploads as artifact
 - **New tag**: Builds the package and creates a GitHub Release automatically
+- **Scheduled comparison**: Compares the language keys with the official Joomla
+  `5.4-dev` or `6.1-dev` branch. Run it manually with the matching branch when
+  checking a specific Joomla release line.
 
 ### Creating a New Release
 ```bash
