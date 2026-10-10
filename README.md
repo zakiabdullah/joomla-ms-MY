@@ -21,8 +21,8 @@ Current enabled targets in `build/build.config.json`:
 
 | Target | Joomla Major | Package Version | Final Artifact |
 |---|---:|---:|---|
-| `j5` | 5 | 5.4.8.1 | `dist/pkg_ms-MY_j5.zip` |
-| `j6` | 6 | 6.1.3.1 | `dist/pkg_ms-MY_j6.zip` |
+| `j5` | 5 | 5.4.9.1 | `dist/pkg_ms-MY_j5.zip` |
+| `j6` | 6 | 6.1.4.1 | `dist/pkg_ms-MY_j6.zip` |
 
 The `j5` and `j6` branches are maintained separately. The current working
 branch is the Joomla 5 release line; build both packages locally with
@@ -91,7 +91,7 @@ These scripts are still available if you need the old flow.
 
 #### Version Bump
 ```bash
-php build/bump.php -v 5.4.8 -l 1
+php build/bump.php -v 5.4.9 -l 1
 ```
 
 #### Build Language Pack
@@ -101,7 +101,7 @@ php build/build.php --lpackages --v
 
 #### Build from Specific Tag
 ```bash
-php build/build.php --lpackages --v --tagversion "5.4.5v1"
+php build/build.php --lpackages --v --tagversion "5.4.9v1"
 ```
 
 Output: `build/tmp/packages/ms-MY_joomla_lang_full_<version>.zip`
@@ -112,22 +112,22 @@ Output: `build/tmp/packages/ms-MY_joomla_lang_full_<version>.zip`
 - **Push to `j5`/`j6`**: Automatically builds the package and uploads as artifact
 - **New tag**: Builds the package and creates a GitHub Release automatically
 - **Scheduled comparison**: Compares the language keys with the official Joomla
-  `5.4-dev` or `6.1-dev` branch. Run it manually with the matching branch when
-  checking a specific Joomla release line.
+  `5.4-dev` branch. Also run it manually against `6.1-dev` to check
+  the Joomla 6 target.
 
 ### Creating a New Release
 ```bash
 # 1. Bump version
-php build/bump.php -v 5.4.8 -l 1
+php build/bump.php -v 5.4.9 -l 1
 
 # 2. Commit changes
 git add -A
-git commit -m "release 5.4.5v1"
+git commit -m "release 5.4.9v1"
 
 # 3. Tag and push
-git tag -a 5.4.8v1 -m "Release 5.4.8v1"
+git tag -a 5.4.9v1 -m "Release 5.4.9v1"
 git push upstream j5
-git push upstream 5.4.8v1
+git push upstream 5.4.9v1
 
 ```
 

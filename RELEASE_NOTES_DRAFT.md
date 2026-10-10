@@ -10,15 +10,15 @@
 - pkg_ms-MY_j6.zip
 
 ## Version Map
-- j5 -> Joomla 5, package version: 5.4.6.1
-- j6 -> Joomla 6, package version: 6.1.1.1
+- j5 -> Joomla 5, package version: 5.4.9.1
+- j6 -> Joomla 6, package version: 6.1.4.1
 
 ## Checksums
 ### pkg_ms-MY_j5.zip
-- SHA256: 7EA3E727E4347BE9830CBA47C6FBE1C2CE2632BFB6F4F6160617EB63646E2893
+- SHA256: 2FB475B8A42E9623038DDB329F128A05489D35DB0C338FFFADF1E542BB1A9ED6
 
 ### pkg_ms-MY_j6.zip
-- SHA256: 2A3CF5578BE0EB0631FC5DD8EE41B195F851CA1612AABF20185B7D131CFE6510
+- SHA256: C7C09F73C7A4E6F25514A729181A8514E83E70485D5E227F6168A1F93160E375
 
 ## Install Notes
 1. Go to Joomla Administrator.
@@ -40,5 +40,4 @@
 
 ## Full Changelog
 - Compare commits since the previous tag in GitHub Releases compare view.
-
 
