@@ -24,7 +24,7 @@ function Get-IniKeys ($filePath) {
         # Abaikan komen dan baris kosong
         if ($line -match '^\s*;' -or [string]::IsNullOrWhiteSpace($line)) { continue }
         # Cari baris yang mengandungi KEY="VALUE"
-        if ($line -match '^([A-Z0-9_\-]+)\s*=') {
+        if ($line -match '^([A-Z0-9_:\-]+)\s*=') {
             $keys += $Matches[1]
         }
     }
