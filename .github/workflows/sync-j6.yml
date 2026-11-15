@@ -1,7 +1,12 @@
 name: Sync j6 with j5
 
-# j5 is the single source of truth for both packages. This keeps the j6
-# branch identical to j5 so nobody builds or edits a stale tree.
+# j5 is the single source of truth. The j6 branch is generated from it:
+# the j5 tree plus the Joomla 6 adjustments made by build/make-target-tree.php
+# (overrides/j6 applied, 6.x manifests, translationlist_6, minimumJoomla 6.0).
+#
+# Joomla's core-translations project downloads the j6 branch as is every night
+# and syncs it to Crowdin and the core installer, so j6 must be Joomla 6 ready.
+# Never commit to j6 directly: it is regenerated on every push to j5.
 on:
   push:
     branches: [j5]
@@ -16,7 +21,7 @@ concurrency:
 
 jobs:
   sync:
-    name: Merge j5 into j6
+    name: Generate j6 from j5
     runs-on: ubuntu-latest
     steps:
       - name: Checkout j6
@@ -25,26 +30,40 @@ jobs:
           ref: j6
           fetch-depth: 0
 
-      - name: Merge j5
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Build the j6 tree from j5
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          if git merge-base --is-ancestor origin/j5 HEAD; then
-            echo "j6 already contains j5."
+          # Start from the exact j5 tree, then apply the Joomla 6 adjustments
+          git read-tree -u --reset origin/j5
+          php build/make-target-tree.php j6
+          git add -A
+
+      - name: Check the generated tree against Joomla 6
+        run: |
+          git clone -q --depth 1 --filter=blob:none --sparse -b 6.2-dev https://github.com/joomla/joomla-cms.git ../joomla-cms
+          git -C ../joomla-cms sparse-checkout set language/en-GB administrator/language/en-GB api/language/en-GB installation/language/en-GB
+          php build/check-translation.php --ref=../joomla-cms | tee ../qa.log
+          if grep -qE "Placeholder mismatch|Protected term" ../qa.log; then
+            echo "::error::The generated j6 tree is not valid for Joomla 6"
+            exit 1
+          fi
+
+      - name: Commit and push j6
+        run: |
+          tree=$(git write-tree)
+          if [ "$tree" = "$(git rev-parse HEAD^{tree})" ]; then
+            echo "j6 is already up to date."
             exit 0
           fi
-
-          if ! git merge --no-edit origin/j5 -m "Sync j6 with j5 (${GITHUB_SHA::7})"; then
-            echo "::error::j6 has diverged from j5 (merge conflict). Changes must be made on j5; resolve j6 manually."
-            exit 1
-          fi
-
-          # The tree of j6 must stay identical to j5
-          if [ "$(git rev-parse HEAD^{tree})" != "$(git rev-parse origin/j5^{tree})" ]; then
-            echo "::error::j6 differs from j5 after merge. Someone committed directly to j6; move those changes to j5."
-            git diff --stat origin/j5 HEAD
-            exit 1
-          fi
-
-          git push origin HEAD:j6
+          # Merge commit: parents are the previous j6 and the j5 commit it was generated from
+          commit=$(git commit-tree "$tree" -p HEAD -p origin/j5 -m "Generate j6 from j5 (${GITHUB_SHA::7})")
+          git push origin "$commit:refs/heads/j6"
+          echo "j6 -> $commit"

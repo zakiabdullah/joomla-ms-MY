@@ -2,10 +2,10 @@ name: Build Joomla Language Pack
 
 on:
   push:
-    branches: [j5, j6]
+    branches: [j5]
     tags: ['*']
   pull_request:
-    branches: [j5, j6]
+    branches: [j5]
 
 permissions:
   contents: write
