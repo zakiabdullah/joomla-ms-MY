@@ -1,18 +1,27 @@
-name: Lint Joomla INI Files
+name: Translation QA
 
 on:
   push:
-    branches: [ "main", "master", "j5", "j6" ]
+    branches: [j5, j6]
     paths:
       - '**.ini'
+      - 'overrides/**'
+      - 'build/check-translation.php'
+      - '.github/workflows/lint-ini.yml'
   pull_request:
-    branches: [ "main", "master", "j5", "j6" ]
+    branches: [j5, j6]
     paths:
       - '**.ini'
+      - 'overrides/**'
+      - 'build/check-translation.php'
+      - '.github/workflows/lint-ini.yml'
+
+permissions:
+  contents: read
 
 jobs:
-  lint:
-    name: Semak Sintaks INI
+  format:
+    name: Format & syntax
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -22,28 +31,59 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+          coverage: none
 
-      - name: Validate XML and language files
+      - name: Validate package XML
         run: php tests/validate.php
 
-      - name: Sahkan fail-fail INI
+      - name: Check language files (UTF-8, KEY="value", duplicates, quotes)
+        run: php build/check-translation.php --summary="$GITHUB_STEP_SUMMARY"
+
+  parity:
+    name: Parity with Joomla ${{ matrix.branch }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - branch: 5.4-dev
+            target: j5
+          - branch: 6.2-dev
+            target: j6
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ms-MY
+
+      - name: Checkout joomla-cms (en-GB language files only)
+        uses: actions/checkout@v4
+        with:
+          repository: joomla/joomla-cms
+          ref: ${{ matrix.branch }}
+          path: joomla-cms
+          sparse-checkout: |
+            language/en-GB
+            administrator/language/en-GB
+            api/language/en-GB
+            installation/language/en-GB
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      # Placeholder mismatches break strings at runtime, so they fail the build.
+      # Missing keys only fall back to en-GB and are reported as warnings.
+      - name: Compare with en-GB
+        working-directory: ms-MY
         run: |
-          php -r '
-            $errors = 0;
-            $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator("."));
-            foreach ($files as $file) {
-              if ($file->getExtension() === "ini") {
-                $parsed = parse_ini_file($file->getRealPath());
-                if ($parsed === false) {
-                  echo "❌ Ralat sintaks ditemui dalam: " . $file->getRealPath() . "\n";
-                  $errors++;
-                }
-              }
-            }
-            if ($errors > 0) {
-              echo "\nSila perbaiki ralat sintaks pada fail-fail di atas.";
-              exit(1);
-            }
-            echo "\n✅ Semua fail .ini berada dalam keadaan baik dan bebas ralat!";
-            exit(0);
-          '
+          php build/check-translation.php \
+            --ref=../joomla-cms \
+            --target=${{ matrix.target }} \
+            --summary="$GITHUB_STEP_SUMMARY" | tee ../qa.log
+          if grep -q "Placeholder mismatch" ../qa.log; then
+            echo "::error::Placeholder mismatches found against ${{ matrix.branch }}"
+            exit 1
+          fi

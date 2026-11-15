@@ -268,6 +268,73 @@ function Copy-FilesToContentRoot {
     }
 }
 
+function Apply-TargetOverrides {
+    <#
+    .SYNOPSIS
+    Overlays per-target string overrides onto the staged language files.
+
+    .DESCRIPTION
+    The repository keeps one translation tree for every Joomla major version.
+    When a string differs between majors (for example a sprintf placeholder
+    that only exists in Joomla 6), the version-specific value lives in
+    overrides/<target key>/<content root>/<file>.ini. Each KEY="value" line
+    there replaces the same key in the staged file, or is appended when the
+    key does not exist yet.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][string]$RepoRoot,
+        [Parameter(Mandatory = $true)][string]$TargetKey,
+        [Parameter(Mandatory = $true)][string]$ContentRoot,
+        [Parameter(Mandatory = $true)][string]$StagedContentRoot
+    )
+
+    $overrideRoot = Join-Path $RepoRoot (Join-Path "overrides/$TargetKey" $ContentRoot)
+
+    if (-not (Test-Path -Path $overrideRoot)) {
+        return
+    }
+
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+
+    foreach ($override in Get-ChildItem -Path $overrideRoot -Filter '*.ini' -File) {
+        $stagedFile = Join-Path $StagedContentRoot $override.Name
+
+        if (-not (Test-Path -Path $stagedFile)) {
+            throw "Override $($override.FullName) has no matching language file ($($override.Name))"
+        }
+
+        $overrides = [ordered]@{}
+
+        foreach ($line in [System.IO.File]::ReadAllLines($override.FullName, $utf8NoBom)) {
+            if ($line -match '^\s*([A-Z0-9_.:\-]+)\s*=\s*".*"\s*$') {
+                $overrides[$Matches[1]] = $line.Trim()
+            }
+        }
+
+        $lines = [System.Collections.Generic.List[string]]::new()
+        $applied = @{}
+
+        foreach ($line in [System.IO.File]::ReadAllLines($stagedFile, $utf8NoBom)) {
+            if ($line -match '^\s*([A-Z0-9_.:\-]+)\s*=' -and $overrides.Contains($Matches[1])) {
+                $lines.Add($overrides[$Matches[1]])
+                $applied[$Matches[1]] = $true
+                continue
+            }
+
+            $lines.Add($line)
+        }
+
+        foreach ($key in $overrides.Keys) {
+            if (-not $applied.ContainsKey($key)) {
+                $lines.Add($overrides[$key])
+            }
+        }
+
+        [System.IO.File]::WriteAllText($stagedFile, (($lines -join "`n") + "`n"), $utf8NoBom)
+        Write-Log -Level INFO -Message "Applied $($overrides.Count) override(s) for $TargetKey to $ContentRoot/$($override.Name)"
+    }
+}
+
 function New-LanguageInstallManifest {
     param(
         [Parameter(Mandatory = $true)][string]$OutputPath,
@@ -540,6 +607,12 @@ function Build-Target {
         Ensure-Directory -Path $subContentRoot
 
         Copy-FilesToContentRoot -Files $sourceFiles -DestinationContentRoot $subContentRoot
+
+        Apply-TargetOverrides `
+            -RepoRoot $RepoRoot `
+            -TargetKey $Target.Key `
+            -ContentRoot $sub.ContentRoot `
+            -StagedContentRoot $subContentRoot
 
         $installXmlPath = Join-Path $subBuildRoot 'install.xml'
         $metaXmlPath = Join-Path $subBuildRoot 'langmetadata.xml'

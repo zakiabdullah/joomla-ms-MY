@@ -12,13 +12,7 @@ permissions:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        include:
-          - target: j5
-            artifact: pkg_ms-MY_j5.zip
-          - target: j6
-            artifact: pkg_ms-MY_j6.zip
+    name: Build packages
     runs-on: windows-latest
 
     steps:
@@ -27,25 +21,47 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Build language pack (${{ matrix.target }})
-        run: |
-          ./build.ps1 -ConfigPath build/build.config.json
+      - name: Check language files
+        shell: pwsh
+        run: php build/check-translation.php
 
-      - name: Verify target artifact
+      # build.ps1 builds every enabled target in build/build.config.json
+      - name: Build language packs
+        shell: pwsh
+        run: ./build.ps1 -ConfigPath build/build.config.json
+
+      - name: Verify artifacts and write checksums
         shell: pwsh
         run: |
-          $path = "dist/${{ matrix.artifact }}"
-          if (-not (Test-Path $path) -or (Get-Item $path).Length -le 0) { throw "Artifact ontbreekt: $path" }
+          $zips = Get-ChildItem dist/pkg_ms-MY_*.zip
+          if ($zips.Count -lt 2) { throw "Expected j5 and j6 packages in dist/, found $($zips.Count)" }
+          foreach ($zip in $zips) {
+            if ($zip.Length -le 0) { throw "Empty artifact: $($zip.Name)" }
+          }
+          $zips | Get-FileHash -Algorithm SHA256 |
+            ForEach-Object { "{0}  {1}" -f $_.Hash.ToLower(), (Split-Path $_.Path -Leaf) } |
+            Set-Content -Path dist/SHA256SUMS.txt -Encoding utf8NoBOM
+          Get-Content dist/SHA256SUMS.txt
 
-      - name: Upload build artifact
+      - name: Upload j5 package
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.target }}-language-pack
-          path: dist/${{ matrix.artifact }}
+          name: j5-language-pack
+          path: dist/pkg_ms-MY_j5.zip
+
+      - name: Upload j6 package
+        uses: actions/upload-artifact@v4
+        with:
+          name: j6-language-pack
+          path: dist/pkg_ms-MY_j6.zip
 
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/') && matrix.target == 'j5'
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.zip
+          files: |
+            dist/pkg_ms-MY_j5.zip
+            dist/pkg_ms-MY_j6.zip
+            dist/SHA256SUMS.txt
+          body_path: RELEASE_NOTES_DRAFT.md
           generate_release_notes: true

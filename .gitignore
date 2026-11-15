@@ -14,3 +14,7 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Visual Studio / local tooling
+.vs/
+.kilo/

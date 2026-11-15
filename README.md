@@ -1,6 +1,8 @@
 # Malay (ms-MY) Language Pack for Joomla! 5 and 6
 
 [![Build Joomla Language Pack](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/build.yml/badge.svg)](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/build.yml)
+[![Translation QA](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/lint-ini.yml/badge.svg)](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/lint-ini.yml)
+[![Sync Check](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/compare-translation.yml/badge.svg)](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/compare-translation.yml)
 [![GitHub release](https://img.shields.io/github/v/release/zakiabdullah/joomla-ms-MY?color=green&include_prereleases&label=release&style=for-the-badge)](https://github.com/zakiabdullah/joomla-ms-MY/releases)
 
 Official Malay (Bahasa Melayu) translation pack for Joomla! CMS.
@@ -24,9 +26,25 @@ Current enabled targets in `build/build.config.json`:
 | `j5` | 5 | 5.4.10.1 | `dist/pkg_ms-MY_j5.zip` |
 | `j6` | 6 | 6.2.0.1 | `dist/pkg_ms-MY_j6.zip` |
 
-The `j5` and `j6` branches are maintained separately. The current working
-branch is the Joomla 5 release line; build both packages locally with
-`build.ps1` and use the package matching the Joomla major version.
+One translation tree builds both packages. `j5` is the source branch, and
+`j6` follows it. Strings whose value must differ between Joomla 5 and 6
+(for example a placeholder that only exists in Joomla 6) live in
+`overrides/j6/`, and `build.ps1` applies them to the Joomla 6 package only.
+
+## Quality
+
+Every change is checked automatically (see [CONTRIBUTING.md](CONTRIBUTING.md)):
+
+- **Format:** UTF-8 without BOM, strict `KEY="value"` lines, upper-case keys,
+  no duplicate keys, escaped quotes.
+- **Parity:** every en-GB key from Joomla `5.4-dev` and `6.2-dev` is
+  translated, and every `%s` / `%1$s` / `{token}` placeholder matches the source.
+- **Terminology:** shared glossary and style guide in [GLOSSARY.md](GLOSSARY.md).
+
+```bash
+php build/check-translation.php                                   # format
+php build/check-translation.php --ref=../joomla-cms --target=j6   # parity
+```
 
 ## Installation
 
@@ -48,12 +66,17 @@ branch is the Joomla 5 release line; build both packages locally with
 ├── administrator/language/ms-MY/    # Administrator language files
 ├── api/language/ms-MY/              # API language files
 ├── installation/language/ms-MY/     # Installation language files
-├── build/                           # Build config and legacy PHP scripts
+├── overrides/j6/                    # Joomla 6 only values applied at build time
+├── build/                           # Build config, QA tool and legacy PHP scripts
 │   ├── build.config.json            # Dual-target build configuration
+│   ├── check-translation.php        # Translation QA (format + parity)
 │   ├── build.php                    # Package builder (CLI)
 │   └── bump.php                     # Version bumper (CLI)
 ├── build.ps1                        # PowerShell dual-target build pipeline
 ├── .github/workflows/               # GitHub Actions CI/CD
+├── CHANGELOG.md                     # Release history
+├── CONTRIBUTING.md                  # How to contribute (Bahasa Melayu)
+├── GLOSSARY.md                      # Terminology & style guide
 ├── pkg_ms-MY.xml                    # Package manifest
 └── script.php                       # Install/update script
 ```
@@ -109,25 +132,24 @@ Output: `build/tmp/packages/ms-MY_joomla_lang_full_<version>.zip`
 ## CI/CD Workflow
 
 ### GitHub Actions
-- **Push to `j5`/`j6`**: Automatically builds the package and uploads as artifact
-- **New tag**: Builds the package and creates a GitHub Release automatically
-- **Scheduled comparison**: Compares the language keys with the official Joomla
-  `5.4-dev` branch. Also run it manually against `6.2-dev` to check
-  the Joomla 6 target.
+- **Push / PR to `j5`/`j6`**: runs Translation QA, builds both packages and uploads them as artifacts.
+- **New tag**: builds both packages and creates a GitHub Release with `SHA256SUMS.txt`.
+- **Weekly sync check**: compares the translation with Joomla `5.4-dev`, `6.2-dev`
+  and the next minor branch, and reports new strings to translate.
 
 ### Creating a New Release
 ```bash
 # 1. Bump version
 php build/bump.php -v 5.4.10 -l 1
 
-# 2. Commit changes
+# 2. Update CHANGELOG.md, run ./build.ps1, then commit
 git add -A
 git commit -m "release 5.4.10v1"
 
 # 3. Tag and push
 git tag -a 5.4.10v1 -m "Release 5.4.10v1"
-git push upstream j5
-git push upstream 5.4.10v1
+git push origin j5
+git push origin 5.4.10v1
 
 ```
 
@@ -137,7 +159,9 @@ Use [RELEASE_NOTES_TEMPLATE.md](RELEASE_NOTES_TEMPLATE.md) to prepare release no
 
 ## Contributing
 
-Contributions are welcome! Please open an [Issue](https://github.com/zakiabdullah/joomla-ms-MY/issues) or submit a Pull Request.
+Contributions are welcome! Read [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[glossary](GLOSSARY.md), then open an [Issue](https://github.com/zakiabdullah/joomla-ms-MY/issues)
+or submit a Pull Request. Report security issues privately as described in [SECURITY.md](SECURITY.md).
 
 ## License
 

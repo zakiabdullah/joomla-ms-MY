@@ -2,85 +2,73 @@ name: Sync Check with Joomla CMS
 
 on:
   schedule:
-    # Berjalan secara automatik setiap hari Ahad jam 12:00 AM UTC
+    # Every Sunday at 00:00 UTC
     - cron: '0 0 * * 0'
   workflow_dispatch:
-    # Membenarkan anda mencetuskan aliran kerja ini secara manual dari tab Actions
     inputs:
-      joomla_branch:
-        description: 'Cabang (branch) joomla-cms untuk disemak (cth: 5.4-dev, 6.2-dev)'
-        required: true
-        default: '6.2-dev'
-      fail_on_missing:
-        description: 'Gagal jika terdapat key terjemahan yang belum diterjemah'
+      strict:
+        description: 'Fail when keys are missing (not only on placeholder mismatches)'
         required: false
         type: boolean
         default: false
 
+permissions:
+  contents: read
+
 jobs:
-  compare-translations:
-    name: Bandingkan fail .ini dengan Joomla Rasmi
+  compare:
+    name: ms-MY vs joomla-cms ${{ matrix.branch }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Development branches: catch new strings before the next release
+          - branch: 5.4-dev
+            target: j5
+          - branch: 6.2-dev
+            target: j6
+          # Next minor in development
+          - branch: 6.3-dev
+            target: j6
 
     steps:
-      - name: Semak keluar (Checkout) repositori ms-MY
+      - name: Checkout ms-MY repository
         uses: actions/checkout@v4
         with:
-          path: joomla-ms-MY
+          path: ms-MY
 
-      - name: Semak keluar (Checkout) repositori joomla-cms
+      - name: Checkout joomla-cms (en-GB language files only)
+        id: cms
+        continue-on-error: true
         uses: actions/checkout@v4
         with:
           repository: joomla/joomla-cms
-          ref: ${{ github.event.inputs.joomla_branch || '6.2-dev' }}
+          ref: ${{ matrix.branch }}
           path: joomla-cms
+          sparse-checkout: |
+            language/en-GB
+            administrator/language/en-GB
+            api/language/en-GB
+            installation/language/en-GB
 
-      - name: Jalankan Perbandingan INI
-        shell: pwsh
+      - name: Branch not available
+        if: steps.cms.outcome != 'success'
+        run: echo "::notice::joomla-cms branch ${{ matrix.branch }} does not exist (yet); skipping."
+
+      - name: Setup PHP
+        if: steps.cms.outcome == 'success'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Compare with en-GB
+        if: steps.cms.outcome == 'success'
+        working-directory: ms-MY
         run: |
-          $sections = @(
-              "language",
-              "administrator/language",
-              "api/language",
-              "installation/language"
-          )
-          
-          $missingKeysFound = $false
-
-          foreach ($section in $sections) {
-              $enDir = "joomla-cms/$section/en-GB"
-              $myDir = "joomla-ms-MY/$section/ms-MY"
-              
-              if (-not (Test-Path $enDir)) { continue }
-              
-              $enFiles = Get-ChildItem -Path $enDir -Filter "*.ini"
-              foreach ($enFile in $enFiles) {
-                  $myFileName = $enFile.Name -replace 'en-GB', 'ms-MY'
-                  $myFilePath = Join-Path $myDir $myFileName
-                  
-                  if (Test-Path $myFilePath) {
-                      # Tangkap amaran (Warning stream 3) dari skrip compare-ini.ps1
-                      $result = joomla-ms-MY/build/compare-ini.ps1 -EnGbFilePath $enFile.FullName -MsMyFilePath $myFilePath 3>&1
-                      
-                      if ($result -match "kunci yang hilang") {
-                          Write-Host "::group::Perbezaan ditemui dalam $myFileName"
-                          Write-Host ($result | Out-String)
-                          Write-Host "::endgroup::"
-                          $missingKeysFound = $true
-                      }
-                  } else {
-                      Write-Host "::warning title=Fail Hilang::Fail $myFileName tidak wujud dalam terjemahan ms-MY."
-                      $missingKeysFound = $true
-                  }
-              }
-          }
-
-          if ($missingKeysFound) {
-              Write-Host "::warning title=Terjemahan Belum Lengkap::Terdapat kunci terjemahan yang belum ada dalam ms-MY. Joomla akan menggunakan fallback en-GB."
-              if ('${{ inputs.fail_on_missing }}' -eq 'true') {
-                  Write-Host "::error title=Mod Ketat::Pemeriksaan diminta gagal apabila key terjemahan hilang."
-                  exit 1
-              }
-          } else {
-              Write-Host "Hebat! Semua terjemahan adalah lengkap dan sejajar dengan en-GB."
-          }
+          php build/check-translation.php \
+            --ref=../joomla-cms \
+            --target=${{ matrix.target }} \
+            --summary="$GITHUB_STEP_SUMMARY" \
+            ${{ inputs.strict && '--strict' || '' }}
