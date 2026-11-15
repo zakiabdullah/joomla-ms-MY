@@ -1,0 +1,50 @@
+name: Sync j6 with j5
+
+# j5 is the single source of truth for both packages. This keeps the j6
+# branch identical to j5 so nobody builds or edits a stale tree.
+on:
+  push:
+    branches: [j5]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-j6
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Merge j5 into j6
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout j6
+        uses: actions/checkout@v4
+        with:
+          ref: j6
+          fetch-depth: 0
+
+      - name: Merge j5
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git merge-base --is-ancestor origin/j5 HEAD; then
+            echo "j6 already contains j5."
+            exit 0
+          fi
+
+          if ! git merge --no-edit origin/j5 -m "Sync j6 with j5 (${GITHUB_SHA::7})"; then
+            echo "::error::j6 has diverged from j5 (merge conflict). Changes must be made on j5; resolve j6 manually."
+            exit 1
+          fi
+
+          # The tree of j6 must stay identical to j5
+          if [ "$(git rev-parse HEAD^{tree})" != "$(git rev-parse origin/j5^{tree})" ]; then
+            echo "::error::j6 differs from j5 after merge. Someone committed directly to j6; move those changes to j5."
+            git diff --stat origin/j5 HEAD
+            exit 1
+          fi
+
+          git push origin HEAD:j6

@@ -7,13 +7,14 @@ on:
   workflow_dispatch:
     inputs:
       strict:
-        description: 'Fail when keys are missing (not only on placeholder mismatches)'
+        description: 'Fail when keys are missing (not only report them)'
         required: false
         type: boolean
         default: false
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   compare:
@@ -71,4 +72,53 @@ jobs:
             --ref=../joomla-cms \
             --target=${{ matrix.target }} \
             --summary="$GITHUB_STEP_SUMMARY" \
-            ${{ inputs.strict && '--strict' || '' }}
+            --json=../qa.json
+
+      # One issue per Joomla branch: opened or updated while strings are missing,
+      # closed automatically once the translation is complete again.
+      - name: Open, update or close the tracking issue
+        if: steps.cms.outcome == 'success' && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: ${{ matrix.branch }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          title="Terjemahan baharu diperlukan: Joomla $BRANCH"
+          gh label create sync --color 1d76db --description "Strings to translate from joomla-cms" --force >/dev/null
+          number=$(gh issue list --label sync --state open --search "in:title \"$title\"" --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          count=$(jq '.warnings | length' qa.json)
+
+          if [ "$count" -eq 0 ]; then
+            if [ -n "$number" ]; then
+              gh issue close "$number" --comment "Semua rentetan Joomla $BRANCH sudah lengkap diterjemah. ✅"
+            fi
+            exit 0
+          fi
+
+          {
+            echo "Semakan automatik mendapati **$count** perkara yang perlu diterjemah atau dibetulkan berbanding \`joomla-cms@$BRANCH\` (target \`$TARGET\`)."
+            echo
+            echo "| Fail | Masalah |"
+            echo "|---|---|"
+            jq -r '.warnings[:300][] | "| `\(.file)` | \(.message | gsub("\\|"; "\\|")) |"' qa.json
+            if [ "$count" -gt 300 ]; then echo; echo "_…dan $((count - 300)) lagi. Lihat log run._"; fi
+            echo
+            echo "Rujuk [GLOSSARY.md]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/blob/j5/GLOSSARY.md) dan [CONTRIBUTING.md]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/blob/j5/CONTRIBUTING.md)."
+            echo "Isu ini dikemas kini secara automatik oleh [run ini]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)."
+          } > body.md
+
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body-file body.md
+          else
+            gh issue create --title "$title" --label sync --body-file body.md
+          fi
+
+      - name: Fail in strict mode
+        if: steps.cms.outcome == 'success' && inputs.strict
+        run: |
+          if [ "$(jq '.warnings | length' qa.json)" -gt 0 ]; then
+            echo "::error::Missing or mismatched strings found against ${{ matrix.branch }}"
+            exit 1
+          fi

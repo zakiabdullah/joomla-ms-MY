@@ -1,20 +1,12 @@
 name: Translation QA
 
+# Runs on every push/PR (no path filter) because these jobs are required
+# status checks for merging into j5.
 on:
   push:
     branches: [j5, j6]
-    paths:
-      - '**.ini'
-      - 'overrides/**'
-      - 'build/check-translation.php'
-      - '.github/workflows/lint-ini.yml'
   pull_request:
     branches: [j5, j6]
-    paths:
-      - '**.ini'
-      - 'overrides/**'
-      - 'build/check-translation.php'
-      - '.github/workflows/lint-ini.yml'
 
 permissions:
   contents: read
