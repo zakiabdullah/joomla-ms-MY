@@ -35,14 +35,14 @@ jobs:
 
     steps:
       - name: Checkout ms-MY repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: ms-MY
 
       - name: Checkout joomla-cms (en-GB language files only)
         id: cms
         continue-on-error: true
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: joomla/joomla-cms
           ref: ${{ matrix.branch }}

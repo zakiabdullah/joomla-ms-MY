@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout j6
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: j6
           fetch-depth: 0

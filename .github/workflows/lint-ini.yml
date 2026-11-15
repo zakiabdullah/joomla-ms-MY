@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -44,12 +44,12 @@ jobs:
             target: j6
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: ms-MY
 
       - name: Checkout joomla-cms (en-GB language files only)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: joomla/joomla-cms
           ref: ${{ matrix.branch }}

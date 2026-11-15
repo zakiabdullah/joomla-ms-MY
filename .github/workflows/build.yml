@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -44,20 +44,20 @@ jobs:
           Get-Content dist/SHA256SUMS.txt
 
       - name: Upload j5 package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: j5-language-pack
           path: dist/pkg_ms-MY_j5.zip
 
       - name: Upload j6 package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: j6-language-pack
           path: dist/pkg_ms-MY_j6.zip
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             dist/pkg_ms-MY_j5.zip
