@@ -156,6 +156,12 @@ Contributions are welcome! Read [CONTRIBUTING.md](CONTRIBUTING.md) and the
 [glossary](GLOSSARY.md), then open an [Issue](https://github.com/zakiabdullah/joomla-ms-MY/issues)
 or submit a Pull Request. Report security issues privately as described in [SECURITY.md](SECURITY.md).
 
+## Contact
+
+- Maintainer: Ahmad Zaki Abdullah, [Joomla! Malaysia](https://www.joomla.my)
+- Email: [zaki@joomla.my](mailto:zaki@joomla.my)
+- Translation errors and suggestions: [GitHub Issues](https://github.com/zakiabdullah/joomla-ms-MY/issues)
+
 ## License
 
 GNU General Public License version 2 or later; see [LICENSE.txt](https://www.gnu.org/licenses/gpl-2.0.html)

@@ -1,5 +1,5 @@
 blank_issues_enabled: true
 contact_links:
   - name: Isu keselamatan
-    url: https://www.joomla.my
-    about: Jangan laporkan isu keselamatan secara terbuka. Lihat SECURITY.md.
+    url: https://github.com/zakiabdullah/joomla-ms-MY/security/policy
+    about: Laporkan isu keselamatan secara sulit ke zaki@joomla.my, bukan melalui Issue awam.
