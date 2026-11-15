@@ -15,6 +15,9 @@ Thumbs.db
 *.swp
 *.swo
 
+# Release body generated in CI
+release-notes.md
+
 # Visual Studio / local tooling
 .vs/
 .kilo/
