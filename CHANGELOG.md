@@ -15,6 +15,8 @@ and the Joomla 6 package.
 ### Fixed
 - "baharu" instead of "baru" for *new* in the site language file, "Pemalam" instead of
   "Plugin" in plugin descriptions, "penerangan" in sample data.
+- "Pembalut" for the Wrapper component (same as the module), "Skema" in the Schema.org plugin,
+  "Sistem - HTTP Headers" plugin name (HTTP Headers stays untranslated as en-GB requires).
 
 ### Tooling
 - Glossary rules (`build/glossary-rules.json`) are enforced in CI.
@@ -22,6 +24,12 @@ and the Joomla 6 package.
 - The weekly sync check opens, updates and closes a `sync` issue per Joomla branch.
 - `j6` is merged from `j5` automatically on every push.
 - Translation QA runs on every push/PR and is required for merging into `j5`.
+- QA enforces en-GB "Do not translate 'X'" notes.
+- Reproducible packages: fixed zip entry order and timestamps (`SOURCE_DATE_EPOCH` / commit time),
+  LF line endings, manifest dates from the commit, so local and CI builds are byte-identical.
+- `build/bump.php` bumps both targets (config, package manifest, source manifests) in one command;
+  the legacy `build/build.php` builder is removed.
+- PHP lint covers every PHP file on 8.1–8.4; Dependabot keeps GitHub Actions up to date.
 
 ## [5.4.10v1] - 2026-11-15
 

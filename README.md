@@ -67,11 +67,12 @@ php build/check-translation.php --ref=../joomla-cms --target=j6   # parity
 ├── api/language/ms-MY/              # API language files
 ├── installation/language/ms-MY/     # Installation language files
 ├── overrides/j6/                    # Joomla 6 only values applied at build time
-├── build/                           # Build config, QA tool and legacy PHP scripts
+├── build/                           # Build config and maintenance tools
 │   ├── build.config.json            # Dual-target build configuration
-│   ├── check-translation.php        # Translation QA (format + parity)
-│   ├── build.php                    # Package builder (CLI)
-│   └── bump.php                     # Version bumper (CLI)
+│   ├── check-translation.php        # Translation QA (format, glossary, parity)
+│   ├── glossary-rules.json          # Banned terms enforced by the QA tool
+│   ├── prune-obsolete.php           # Remove keys no supported version uses
+│   └── bump.php                     # Version bump for both targets
 ├── build.ps1                        # PowerShell dual-target build pipeline
 ├── .github/workflows/               # GitHub Actions CI/CD
 ├── CHANGELOG.md                     # Release history
@@ -109,25 +110,17 @@ Output:
 - `dist/pkg_ms-MY_j5.zip`
 - `dist/pkg_ms-MY_j6.zip`
 
-### Legacy PHP Helpers
-These scripts are still available if you need the old flow.
-
-#### Version Bump
+### Version Bump
+Updates `build/build.config.json`, `pkg_ms-MY.xml` and the source manifests for both targets:
 ```bash
-php build/bump.php -v 5.4.10 -l 1
+php build/bump.php --j5=5.4.11 --j6=6.2.1 --pack=1
 ```
 
-#### Build Language Pack
+### Maintenance
 ```bash
-php build/build.php --lpackages --v
+# Remove keys that no supported Joomla version uses (dry run; add --write to apply)
+php build/prune-obsolete.php --ref=../cms-5.4.10 --ref=../cms-5.4-dev --ref=../cms-6.2.0 --ref=../cms-6.2-dev
 ```
-
-#### Build from Specific Tag
-```bash
-php build/build.php --lpackages --v --tagversion "5.4.10v1"
-```
-
-Output: `build/tmp/packages/ms-MY_joomla_lang_full_<version>.zip`
 
 ## CI/CD Workflow
 
@@ -139,17 +132,17 @@ Output: `build/tmp/packages/ms-MY_joomla_lang_full_<version>.zip`
 
 ### Creating a New Release
 ```bash
-# 1. Bump version
-php build/bump.php -v 5.4.10 -l 1
+# 1. Bump version (both targets)
+php build/bump.php --j5=5.4.11 --j6=6.2.1 --pack=1
 
 # 2. Update CHANGELOG.md, run ./build.ps1, then commit
 git add -A
-git commit -m "release 5.4.10v1"
+git commit -m "Release 5.4.11v1"
 
 # 3. Tag and push
-git tag -a 5.4.10v1 -m "Release 5.4.10v1"
+git tag -a 5.4.11v1 -m "Release 5.4.11v1"
 git push origin j5
-git push origin 5.4.10v1
+git push origin 5.4.11v1
 
 ```
 

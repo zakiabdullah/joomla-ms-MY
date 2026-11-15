@@ -104,10 +104,11 @@ php build/prune-obsolete.php ... --write
 
 ## Proses keluaran (penyelenggara)
 
-1. Kemas kini `packageVersion` dalam `build/build.config.json` dan `<version>` dalam `pkg_ms-MY.xml`.
+1. Jalankan `php build/bump.php --j5=<versi> --j6=<versi> --pack=1`. Ia mengemas kini `build.config.json`, `pkg_ms-MY.xml` dan manifest sumber.
 2. Kemas kini [CHANGELOG.md](CHANGELOG.md).
 3. Kemas kini `RELEASE_NOTES_DRAFT.md` (badan GitHub Release), kemudian jalankan `pwsh ./build.ps1` untuk menguji.
-   Checksum rasmi ialah `SHA256SUMS.txt` yang dijana oleh CI, kerana zip tempatan mempunyai cap masa yang berbeza.
+   Build boleh dihasilkan semula: commit yang sama menghasilkan zip yang sama bait demi bait,
+   jadi checksum tempatan boleh dibandingkan dengan `SHA256SUMS.txt` dalam Release.
 4. Commit, kemudian tag mengikut format `<versi Joomla 5>v<n>`, cth. `5.4.10v1`, dan push tag tersebut.
    CI akan membina pakej dan mencipta GitHub Release bersama `SHA256SUMS.txt`.
 

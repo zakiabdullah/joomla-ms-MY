@@ -21,6 +21,7 @@ Istilah yang dilarang dikuatkuasakan secara automatik oleh
 | HTML | Kekalkan semua tag dan atribut. Terjemahkan teks dalam atribut `title`/`alt`. | `<a href='{itemlink}' title='Sunting {type} {title}'>` |
 | Petikan berganda | Dalam nilai INI, tulis `\"`. Petikan tunggal `'` dibenarkan. | `"Klik \"Simpan\""` |
 | Komen di hujung baris | Jika en-GB ada komen `; Do not translate ...`, kekalkan. | `JFIELD_MEDIA_DOWNLOAD_FILE="Muat turun {file}" ; ...` |
+| *Do not translate* | Istilah yang en-GB tandakan *Do not translate 'X'* mesti kekal dalam terjemahan (disemak oleh CI). | `"Paksa HTTP Headers"` |
 | Ringkas | Label butang dan menu mesti pendek. Jangan tambah perkataan yang tiada dalam sumber. | "Status", bukan "Status Aliran Kerja" |
 
 ## Istilah teras
@@ -59,6 +60,7 @@ Istilah yang dilarang dikuatkuasakan secara automatik oleh
 | Field | Medan | Custom Fields: *Medan Tersuai* |
 | File | Fail | |
 | Folder | Folder | |
+| Header (HTTP) | Pengepala | Kekalkan *HTTP Headers* jika en-GB menyatakan *Do not translate* |
 | Help | Bantuan | |
 | Hits | Tontonan | |
 | Install | Pasang | |
@@ -79,6 +81,7 @@ Istilah yang dilarang dikuatkuasakan secara automatik oleh
 | Published | Diterbitkan | Penerbitan = *Publishing* |
 | Register | Daftar | |
 | Save / Save & Close | Simpan / Simpan & Tutup | |
+| Schema | Skema | *Schema.org* ialah nama, tidak diterjemah |
 | Search | Carian (kata nama), Cari (kata kerja) | |
 | Settings | Tetapan | |
 | Site | Laman | Website: *laman web* |
@@ -96,3 +99,4 @@ Istilah yang dilarang dikuatkuasakan secara automatik oleh
 | Username | Nama Pengguna | |
 | Version | Versi | |
 | Workflow | Aliran Kerja | |
+| Wrapper | Pembalut | |
