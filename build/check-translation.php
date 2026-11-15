@@ -50,7 +50,7 @@ $isCi    = getenv('GITHUB_ACTIONS') === 'true';
 
 $errors   = [];
 $warnings = [];
-$stats    = ['files' => 0, 'keys' => 0, 'missing_files' => 0, 'missing_keys' => 0, 'placeholders' => 0, 'obsolete' => 0];
+$stats    = ['files' => 0, 'keys' => 0, 'missing_files' => 0, 'missing_keys' => 0, 'placeholders' => 0, 'protected' => 0, 'obsolete' => 0];
 
 /**
  * Report a problem; emits a GitHub annotation when running in Actions.
@@ -68,14 +68,15 @@ function report(array &$bucket, string $level, string $file, ?int $line, string 
 /**
  * Parse an INI file in Joomla's strict format.
  *
- * @return array{0: array<string,string>, 1: array<string,int>, 2: list<array{int,string}>}
- *         [key => value], [key => line number], [ [line, problem] ... ]
+ * @return array{0: array<string,string>, 1: array<string,int>, 2: list<array{int,string}>, 3: array<string,string>}
+ *         [key => value], [key => line number], [ [line, problem] ... ], [key => trailing comment]
  */
 function parseStrict(string $path): array
 {
     $values   = [];
     $lines    = [];
     $problems = [];
+    $comments = [];
     $content  = (string) file_get_contents($path);
 
     if (str_starts_with($content, "\xEF\xBB\xBF")) {
@@ -96,12 +97,16 @@ function parseStrict(string $path): array
         }
 
         // A trailing "; comment" after the closing quote is allowed (en-GB uses it too)
-        if (!preg_match('/^([^=\s]+)\s*=\s*"(.*)"\s*(?:;.*)?$/', $line, $m)) {
+        if (!preg_match('/^([^=\s]+)\s*=\s*"(.*)"\s*(?:;(.*))?$/', $line, $m)) {
             $problems[] = [$n, 'Line is not in KEY="value" format'];
             continue;
         }
 
-        [, $key, $value] = $m;
+        [$key, $value] = [$m[1], $m[2]];
+
+        if (isset($m[3])) {
+            $comments[$key] = trim($m[3]);
+        }
 
         if ($key !== strtoupper($key) || !preg_match('/^[A-Z0-9_.:\-]+$/', $key)) {
             $problems[] = [$n, "Invalid key name: {$key}"];
@@ -124,7 +129,7 @@ function parseStrict(string $path): array
         $problems[] = [1, 'parse_ini_file() failed'];
     }
 
-    return [$values, $lines, $problems];
+    return [$values, $lines, $problems, $comments];
 }
 
 /**
@@ -200,6 +205,40 @@ foreach ($overrideFiles as $path) {
     }
 }
 
+/**
+ * Terms that en-GB marks as untranslatable in a trailing comment, e.g.
+ *   KEY="Force HTTP Headers" ; Do not translate 'HTTP Headers'
+ *   KEY="max-age" ; Do not translate                 (the whole value)
+ *   KEY="..." ; Do not translate the word Markdown
+ *   KEY="..." ; do not translate $key
+ * "Do not translate the text between the {}" is covered by the placeholder check.
+ *
+ * @return list<string>
+ */
+function protectedTerms(string $enValue, string $comment): array
+{
+    if (!preg_match('/not\s+translate/i', $comment) || preg_match('/between the \{\}/i', $comment)) {
+        return [];
+    }
+
+    $terms = [];
+
+    if (preg_match_all("/'([^']+)'/", $comment, $m)) {
+        $terms = $m[1];
+    } elseif (preg_match('/the word\s+([\w.\-]+)/i', $comment, $m)) {
+        $terms = [$m[1]];
+    } elseif (preg_match_all('/\$\w+/', $comment, $m)) {
+        $terms = $m[0];
+    } elseif (preg_match('/^\W*(?:please\s+)?do\s+not\s+translate\W*$/i', $comment)) {
+        // The whole visible text must stay as is (markup may be localised, e.g. link text)
+        $text  = trim(html_entity_decode(strip_tags($enValue)));
+        $terms = $text !== '' ? [$text] : [];
+    }
+
+    // Only enforce terms that really occur in the source string
+    return array_values(array_filter($terms, static fn ($t) => str_contains($enValue, $t)));
+}
+
 foreach (SECTIONS as $section) {
     $msDir = "{$root}/{$section}/" . TAG;
 
@@ -238,7 +277,7 @@ foreach (SECTIONS as $section) {
         $name   = basename($enPath);
         $msPath = "{$msDir}/{$name}";
         $rel    = "{$section}/" . TAG . "/{$name}";
-        [$en]   = parseStrict($enPath);
+        [$en, , , $enComments] = parseStrict($enPath);
 
         if (!is_file($msPath)) {
             $stats['missing_files']++;
@@ -269,6 +308,13 @@ foreach (SECTIONS as $section) {
                 $actual   = implode(' ', placeholders($ms[$key])) ?: '(none)';
                 report($warnings, 'warning', $rel, $msLines[$key], "Placeholder mismatch in {$key}: en-GB has {$expected}, ms-MY has {$actual}", $isCi);
             }
+
+            foreach (protectedTerms($enValue, $enComments[$key] ?? '') as $term) {
+                if (!str_contains($ms[$key], $term)) {
+                    $stats['protected']++;
+                    report($warnings, 'warning', $rel, $msLines[$key], "Protected term in {$key}: en-GB says do not translate \"{$term}\"", $isCi);
+                }
+            }
         }
 
         $obsolete = array_diff_key($ms, $en);
@@ -296,7 +342,7 @@ $summary = sprintf(
     count($errors),
     count($warnings),
     $ref !== null
-        ? sprintf(' (missing files: %d, missing keys: %d, placeholder mismatches: %d, keys not in reference: %d)', $stats['missing_files'], $stats['missing_keys'], $stats['placeholders'], $stats['obsolete'])
+        ? sprintf(' (missing files: %d, missing keys: %d, placeholder mismatches: %d, protected terms: %d, keys not in reference: %d)', $stats['missing_files'], $stats['missing_keys'], $stats['placeholders'], $stats['protected'], $stats['obsolete'])
         : ''
 );
 
@@ -314,6 +360,7 @@ if (isset($options['summary'])) {
         $md[] = "| Missing files | {$stats['missing_files']} |";
         $md[] = "| Missing keys | {$stats['missing_keys']} |";
         $md[] = "| Placeholder mismatches | {$stats['placeholders']} |";
+        $md[] = "| Protected terms translated | {$stats['protected']} |";
     }
 
     if ($warnings) {
