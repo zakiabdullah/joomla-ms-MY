@@ -2,8 +2,8 @@
 
 ## Melaporkan isu
 
-Sila laporkan isu keselamatan secara sulit kepada pemilik repositori melalui
-saluran hubungan di [joomla.my](https://www.joomla.my). Jangan dedahkan
+Sila laporkan isu keselamatan secara sulit melalui e-mel ke
+**[zaki@joomla.my](mailto:zaki@joomla.my)**. Jangan dedahkan
 butiran kerentanan secara terbuka sebelum pembaikan tersedia.
 
 ## Skop
