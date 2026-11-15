@@ -25,7 +25,7 @@ class Pkg_msMYInstallerScript extends InstallerScript
 	 */
 	public function __construct()
 	{
-		$this->minimumJoomla = '5.0';
+		$this->minimumJoomla = '6.0';
 		$this->minimumPhp    = '8.1.0';
 	}
 }

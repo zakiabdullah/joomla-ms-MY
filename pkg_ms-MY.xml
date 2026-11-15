@@ -2,7 +2,7 @@
 <extension type="package" method="upgrade">
 	<name>Malay (ms-MY) Language Pack</name>
 	<packagename>ms-MY</packagename>
-	<version>5.4.10.1</version>
+	<version>6.2.0.1</version>
 	<author>Ahmad Zaki Abdullah</author>
 	<authorEmail>zaki@joomla.my</authorEmail>
 	<authorUrl>https://www.joomla.my</authorUrl>
@@ -24,6 +24,6 @@
 		<file type="language" client="api" id="ms-MY">api_ms-MY.zip</file>
 	</files>
 	<updateservers>
-		<server type="collection" name="Joomla! Update Directory">https://update.joomla.org/language/translationlist_5.xml</server>
+		<server type="collection" name="Joomla! Update Directory">https://update.joomla.org/language/translationlist_6.xml</server>
 	</updateservers>
 </extension>

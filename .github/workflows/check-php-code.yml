@@ -2,9 +2,9 @@ name: Check PHP Code
 
 on:
   push:
-    branches: [j5, j6]
+    branches: [j5]
   pull_request:
-    branches: [j5, j6]
+    branches: [j5]
   workflow_dispatch:
 
 permissions:

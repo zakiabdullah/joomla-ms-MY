@@ -26,8 +26,10 @@ Current enabled targets in `build/build.config.json`:
 | `j5` | 5 | 5.4.10.1 | `dist/pkg_ms-MY_j5.zip` |
 | `j6` | 6 | 6.2.0.1 | `dist/pkg_ms-MY_j6.zip` |
 
-One translation tree builds both packages. `j5` is the source branch, and
-`j6` follows it. Strings whose value must differ between Joomla 5 and 6
+One translation tree builds both packages. `j5` is the source branch; `j6` is
+generated from it with the Joomla 6 adjustments (`build/make-target-tree.php`).
+Joomla's [core-translations](https://github.com/joomla/core-translations) project pulls
+both branches every night and syncs them to Crowdin and the core installer. Strings whose value must differ between Joomla 5 and 6
 (for example a placeholder that only exists in Joomla 6) live in
 `overrides/j6/`, and `build.ps1` applies them to the Joomla 6 package only.
 
@@ -73,6 +75,7 @@ php build/check-translation.php --ref=../joomla-cms --target=j6   # parity
 │   ├── glossary-rules.json          # Banned terms enforced by the QA tool
 │   ├── prune-obsolete.php           # Remove keys no supported version uses
 │   ├── release-notes.php            # Release body from CHANGELOG.md
+│   ├── make-target-tree.php         # Generate the j6 branch tree from j5
 │   └── bump.php                     # Version bump for both targets
 ├── build.ps1                        # PowerShell dual-target build pipeline
 ├── .github/workflows/               # GitHub Actions CI/CD

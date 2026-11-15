@@ -28,8 +28,15 @@ perubahan diterima.
 
 Pohon fail di atas digunakan untuk membina **kedua-dua** pakej
 `pkg_ms-MY_j5.zip` (Joomla 5) dan `pkg_ms-MY_j6.zip` (Joomla 6). Cabang `j5`
-ialah sumber utama. Cabang `j6` diselaraskan dengan `j5` secara automatik, jadi
-**jangan commit terus ke `j6`**. Kunci yang hanya wujud dalam satu versi tidak
+ialah sumber utama. Cabang `j6` **dijana** daripada `j5` secara automatik: pohon `j5`
+ditambah penyesuaian Joomla 6 (override `overrides/j6/` diaplikasikan, manifest versi 6.x,
+`translationlist_6`, `minimumJoomla` 6.0). **Jangan commit terus ke `j6`.**
+
+Kedua-dua cabang dibaca terus oleh projek
+[core-translations](https://github.com/joomla/core-translations) Joomla setiap malam
+(`j5` pada 21:15 UTC, `j6` pada 22:00 UTC), kemudian disegerakkan ke Crowdin dan
+**pemasang teras Joomla**. Jadi apa yang ada dalam `j5`/`j6` sampai kepada semua
+pengguna yang memasang Joomla dalam Bahasa Melayu. Kunci yang hanya wujud dalam satu versi tidak
 mendatangkan masalah, kerana Joomla mengabaikan kunci yang tidak digunakan.
 
 Jika **nilai** sesuatu kunci mesti berbeza antara versi, contohnya Joomla 6
@@ -77,7 +84,7 @@ sama seperti yang dibuat oleh build.
 | **Translation QA** | Setiap push/PR | Ralat format, istilah yang dilarang oleh glosari, atau placeholder tidak sepadan dengan en-GB `5.4-dev`/`6.2-dev` |
 | **Build Joomla Language Pack** | Push/PR/tag | Build gagal atau pakej kosong |
 | **Sync Check with Joomla CMS** | Setiap Ahad | Membuka/mengemas kini Issue `sync` jika Joomla menambah rentetan baharu, dan menutupnya apabila lengkap |
-| **Sync j6 with j5** | Push ke `j5` | `j6` mengandungi commit yang tiada dalam `j5` |
+| **Sync j6 with j5** | Push ke `j5` | Pohon `j6` yang dijana tidak sah untuk Joomla 6 (placeholder/istilah dilindungi) |
 
 Merge ke `j5` memerlukan semakan **Translation QA** dan **Build** lulus.
 
