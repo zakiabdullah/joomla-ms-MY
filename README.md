@@ -72,6 +72,7 @@ php build/check-translation.php --ref=../joomla-cms --target=j6   # parity
 │   ├── check-translation.php        # Translation QA (format, glossary, parity)
 │   ├── glossary-rules.json          # Banned terms enforced by the QA tool
 │   ├── prune-obsolete.php           # Remove keys no supported version uses
+│   ├── release-notes.php            # Release body from CHANGELOG.md
 │   └── bump.php                     # Version bump for both targets
 ├── build.ps1                        # PowerShell dual-target build pipeline
 ├── .github/workflows/               # GitHub Actions CI/CD
@@ -135,7 +136,7 @@ php build/prune-obsolete.php --ref=../cms-5.4.10 --ref=../cms-5.4-dev --ref=../c
 # 1. Bump version (both targets)
 php build/bump.php --j5=5.4.11 --j6=6.2.1 --pack=1
 
-# 2. Update CHANGELOG.md, run ./build.ps1, then commit
+# 2. Rename [Unreleased] in CHANGELOG.md to [5.4.11v1], run ./build.ps1, then commit
 git add -A
 git commit -m "Release 5.4.11v1"
 
@@ -146,9 +147,10 @@ git push origin 5.4.11v1
 
 ```
 
-## Release Notes Template
+## Release Notes
 
-Use [RELEASE_NOTES_TEMPLATE.md](RELEASE_NOTES_TEMPLATE.md) to prepare release notes for both `j5` and `j6` artifacts.
+[CHANGELOG.md](CHANGELOG.md) is the single source of release notes. When a tag is pushed,
+`build/release-notes.php` turns the matching `## [<tag>]` section into the GitHub Release body.
 
 ## Contributing
 

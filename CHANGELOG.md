@@ -30,6 +30,9 @@ and the Joomla 6 package.
 - `build/bump.php` bumps both targets (config, package manifest, source manifests) in one command;
   the legacy `build/build.php` builder is removed.
 - PHP lint covers every PHP file on 8.1–8.4; Dependabot keeps GitHub Actions up to date.
+- Release notes come from this CHANGELOG (`build/release-notes.php`); the release fails when the
+  section is missing or the tag does not match the j5 package version. `RELEASE_NOTES_*.md` and
+  `tests/validate.php` are removed (XML validation moved into the QA tool).
 
 ## [5.4.10v1] - 2026-11-15
 
