@@ -25,10 +25,7 @@ jobs:
           php-version: '8.2'
           coverage: none
 
-      - name: Validate package XML
-        run: php tests/validate.php
-
-      - name: Check language files (UTF-8, KEY="value", duplicates, quotes)
+      - name: Check language files and XML manifests
         run: php build/check-translation.php --summary="$GITHUB_STEP_SUMMARY"
 
   parity:

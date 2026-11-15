@@ -104,4 +104,4 @@ $tag = "{$options['j5']}v{$pack}";
 
 echo "Joomla 5 package: {$full['j5']}\n";
 echo "Joomla 6 package: {$full['j6']}\n";
-echo "Next: update CHANGELOG.md and RELEASE_NOTES_DRAFT.md, run ./build.ps1, commit, then tag {$tag}\n";
+echo "Next: rename the CHANGELOG.md [Unreleased] section to [{$tag}], run ./build.ps1, commit, then tag {$tag}\n";

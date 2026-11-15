@@ -10,6 +10,7 @@
  *   - no unescaped double quotes inside a value
  *   - file parses with parse_ini_file(INI_SCANNER_RAW)
  *   - no banned terms from build/glossary-rules.json (see GLOSSARY.md)
+ *   - package and language XML manifests are well-formed
  *
  * Reference checks (with --ref=<path to a joomla-cms checkout>):
  *   - en-GB files without a ms-MY counterpart
@@ -177,6 +178,20 @@ function checkGlossary(array $rules, array $allow, string $rel, string $key, str
         if (preg_match('/' . $rule['pattern'] . '/iu', $text, $m)) {
             report($errors, 'error', $rel, $line, "Glossary: \"{$m[0]}\" in {$key}, use \"{$rule['use']}\" ({$rule['en']})", $isCi);
         }
+    }
+}
+
+// XML manifests must be well-formed
+$xmlFiles = array_merge(glob("{$root}/*.xml") ?: [], glob("{$root}/*/language/" . TAG . '/*.xml') ?: [], glob("{$root}/language/" . TAG . '/*.xml') ?: []);
+
+foreach (array_unique($xmlFiles) as $path) {
+    $rel = substr(str_replace('\\', '/', $path), strlen(str_replace('\\', '/', $root)) + 1);
+    libxml_use_internal_errors(true);
+    libxml_clear_errors();
+
+    if (simplexml_load_file($path) === false) {
+        $error = libxml_get_errors()[0] ?? null;
+        report($errors, 'error', $rel, $error?->line, 'Invalid XML: ' . trim($error?->message ?? 'parse error'), $isCi);
     }
 }
 
