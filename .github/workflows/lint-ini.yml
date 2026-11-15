@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -44,12 +44,12 @@ jobs:
             target: j6
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: ms-MY
 
       - name: Checkout joomla-cms (en-GB language files only)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: joomla/joomla-cms
           ref: ${{ matrix.branch }}
@@ -75,7 +75,7 @@ jobs:
             --ref=../joomla-cms \
             --target=${{ matrix.target }} \
             --summary="$GITHUB_STEP_SUMMARY" | tee ../qa.log
-          if grep -q "Placeholder mismatch" ../qa.log; then
-            echo "::error::Placeholder mismatches found against ${{ matrix.branch }}"
+          if grep -qE "Placeholder mismatch|Protected term" ../qa.log; then
+            echo "::error::Placeholder or protected-term problems found against ${{ matrix.branch }}"
             exit 1
           fi

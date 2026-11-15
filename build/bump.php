@@ -1,219 +1,107 @@
 <?php
+
 /**
- * Script used to make a version bump
- * Updates all version XMLs
+ * Bump the language pack version for both Joomla targets in one go.
  *
- * Usage: php build/bump.php -v <version> -l <languagepackversion>
+ * Updates:
+ *   - build/build.config.json   packageVersion of the j5 and j6 targets (used by build.ps1)
+ *   - pkg_ms-MY.xml             <version> (Joomla 5 package manifest kept in the repo)
+ *   - {site,administrator,api,installation} ms-MY install.xml / langmetadata.xml
+ *                               <version> and <creationDate> of the source manifests
  *
- * Examples:
- * - php build/bump.php -v 5.4.4 -l 1
- * - php build/bump.php -v 6.0.0 -l 1
+ * Usage:
+ *   php build/bump.php --j5=5.4.11 --j6=6.2.1 [--pack=1]
  *
- * @package    Joomla.Language
- * @copyright  (C) 2026 Joomla! Malaysia <https://www.joomla.my>
+ * --pack is the language pack revision (5.4.11.<pack>); default 1.
+ * The release tag to create afterwards is printed at the end, e.g. 5.4.11v1.
+ *
+ * @copyright  (C) 2026 Joomla! Malaysia
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-// Based on the J!German bump script
-// https://github.com/joomlagerman/joomla/blob/5.4-dev/build/bump.php
+declare(strict_types=1);
 
-// Functions
-function usage($command)
-{
-	echo PHP_EOL;
-	echo 'Usage: php ' . $command . ' [options]' . PHP_EOL;
-	echo PHP_TAB . '[options]:' . PHP_EOL;
-	echo PHP_TAB . PHP_TAB . '-v <version>:' . PHP_TAB . 'Version (ex: 5.4.4, 6.0.0)' . PHP_EOL;
-	echo PHP_TAB . PHP_TAB . '-l <languagepackversion>:' . PHP_TAB . 'Language pack version (ex: 1, 2)' . PHP_EOL;
-	echo PHP_EOL;
+$options = getopt('', ['j5:', 'j6:', 'pack:', 'help']);
+
+if (isset($options['help']) || !isset($options['j5'], $options['j6'])) {
+    fwrite(STDOUT, "Usage: php build/bump.php --j5=5.4.11 --j6=6.2.1 [--pack=1]\n");
+    exit(isset($options['help']) ? 0 : 2);
 }
 
-// Constants.
-const PHP_TAB = "\t";
+$pack = (string) ($options['pack'] ?? '1');
 
-// File paths.
-$languageXmlFiles = [
-	'/administrator/language/ms-MY/install.xml',
-	'/administrator/language/ms-MY/langmetadata.xml',
-	'/api/language/ms-MY/install.xml',
-	'/api/language/ms-MY/langmetadata.xml',
-	'/language/ms-MY/install.xml',
-	'/language/ms-MY/langmetadata.xml',
+foreach (['j5' => 5, 'j6' => 6] as $key => $major) {
+    if (!preg_match('/^' . $major . '\.\d+\.\d+$/', (string) $options[$key])) {
+        fwrite(STDERR, "--{$key} must be a Joomla {$major}.x.y version, got '{$options[$key]}'\n");
+        exit(2);
+    }
+}
+
+if (!preg_match('/^\d+$/', $pack)) {
+    fwrite(STDERR, "--pack must be a number, got '{$pack}'\n");
+    exit(2);
+}
+
+$root = dirname(__DIR__);
+$full = [
+    'j5' => "{$options['j5']}.{$pack}",
+    'j6' => "{$options['j6']}.{$pack}",
 ];
+$today = date('Y-m-d');
 
-$installerXmlFile = '/installation/language/ms-MY/langmetadata.xml';
-
-$languagePackXmlFile = '/pkg_ms-MY.xml';
-
-/*
- * Change copyright date exclusions.
- * Some systems may try to scan the .git directory, exclude it.
+/**
+ * Apply a regex replacement to a file and fail loudly when nothing matched.
  */
-$directoryLoopExcludeDirectories = [
-	'/.git',
-	'/build/tmp/',
-];
-
-$directoryLoopExcludeFiles = [];
-
-// Check arguments (exit if incorrect cli arguments).
-$opts = getopt("v:l:");
-
-if (empty($opts['v']))
+function replaceIn(string $path, string $pattern, string $replacement): void
 {
-	usage($argv[0]);
-	die();
+    $content = (string) file_get_contents($path);
+    $updated = preg_replace($pattern, $replacement, $content, -1, $count);
+
+    if ($count === 0) {
+        fwrite(STDERR, "Pattern not found in {$path}: {$pattern}\n");
+        exit(1);
+    }
+
+    file_put_contents($path, $updated);
 }
 
-if (empty($opts['l']))
-{
-	usage($argv[0]);
-	die();
+// 1. build.config.json: the packageVersion that follows each target key
+$config = "{$root}/build/build.config.json";
+
+foreach ($full as $key => $version) {
+    replaceIn(
+        $config,
+        '/("key"\s*:\s*"' . $key . '"[^}]*?"packageVersion"\s*:\s*")[^"]*(")/s',
+        '${1}' . $version . '${2}'
+    );
 }
 
-// Check version string (exit if not correct).
-$versionParts = explode('-', $opts['v']);
-$languagePackVersion = (integer) $opts['l'];
+json_decode((string) file_get_contents($config), flags: JSON_THROW_ON_ERROR);
 
-if (!preg_match('#^[0-9]+\.[0-9]+\.[0-9]+$#', $versionParts[0]))
-{
-	usage($argv[0]);
-	die();
+// 2. Repository package manifest (Joomla 5 line)
+replaceIn("{$root}/pkg_ms-MY.xml", '#<version>[^<]*</version>#', "<version>{$full['j5']}</version>");
+
+// 3. Source manifests (the build regenerates them, keep them in sync for reference)
+foreach (['language', 'administrator/language', 'api/language'] as $section) {
+    foreach (['install.xml', 'langmetadata.xml'] as $file) {
+        $path = "{$root}/{$section}/ms-MY/{$file}";
+
+        if (is_file($path)) {
+            replaceIn($path, '#<version>[^<]*</version>#', "<version>{$full['j5']}</version>");
+            replaceIn($path, '#<creationDate>[^<]*</creationDate>#', "<creationDate>{$today}</creationDate>");
+        }
+    }
 }
 
-if (!is_integer($languagePackVersion))
-{
-	usage($argv[0]);
-	die();
+$installer = "{$root}/installation/language/ms-MY/langmetadata.xml";
+
+if (is_file($installer)) {
+    replaceIn($installer, '#<version>[^<]*</version>#', "<version>{$options['j5']}</version>");
+    replaceIn($installer, '#<creationDate>[^<]*</creationDate>#', '<creationDate>' . date('Y-m') . '</creationDate>');
 }
 
-// Make sure we use the correct language and timezone.
-setlocale(LC_ALL, 'en_GB');
-date_default_timezone_set('Asia/Kuala_Lumpur');
+$tag = "{$options['j5']}v{$pack}";
 
-// Set version properties.
-$versionSubParts = explode('.', $versionParts[0]);
-
-$version = [
-	'main'            => $versionSubParts[0] . '.' . $versionSubParts[1],
-	'major'           => $versionSubParts[0],
-	'minor'           => $versionSubParts[1],
-	'patch'           => $versionSubParts[2],
-	'release'         => $versionSubParts[0] . '.' . $versionSubParts[1] . '.' . $versionSubParts[2] . 'v' . $languagePackVersion,
-	'full'            => $versionSubParts[0] . '.' . $versionSubParts[1] . '.' . $versionSubParts[2] . '.' . $languagePackVersion,
-	'reldate'         => date('j-F-Y'),
-	'reltime'         => date('H:i'),
-	'reltz'           => 'GMT+8',
-	'credate'         => date('Y-m-d'),
-	'install_credate' => date('Y-m'),
-	'install_version' => $versionSubParts[0] . '.' . $versionSubParts[1] . '.' . $versionSubParts[2],
-];
-
-// Prints version information.
-echo PHP_EOL;
-echo 'Version data:' . PHP_EOL;
-echo '- Main:' . PHP_TAB . PHP_TAB . PHP_TAB . PHP_TAB . $version['main'] . PHP_EOL;
-echo '- Release:' . PHP_TAB . PHP_TAB . PHP_TAB . $version['release'] . PHP_EOL;
-echo '- Full:' . PHP_TAB . PHP_TAB . PHP_TAB . PHP_TAB . $version['full'] . PHP_EOL;
-echo '- Release date:' . PHP_TAB . PHP_TAB . PHP_TAB . $version['reldate'] . PHP_EOL;
-echo '- Creation date:' . PHP_TAB . PHP_TAB . $version['credate'] . PHP_EOL;
-echo '- Installer: creation date:' . PHP_TAB . $version['install_credate'] . PHP_EOL;
-echo '- Installer: version:' . PHP_TAB . PHP_TAB . $version['install_version'] . PHP_EOL;
-
-echo PHP_EOL;
-
-$rootPath = dirname(__DIR__);
-
-// Updates the version and creation date in language xml files.
-foreach ($languageXmlFiles as $languageXmlFile)
-{
-	if (file_exists($rootPath . $languageXmlFile))
-	{
-		$fileContents = file_get_contents($rootPath . $languageXmlFile);
-		$fileContents = preg_replace('#<version>[^<]*</version>#', '<version>' . $version['full'] . '</version>', $fileContents);
-		$fileContents = preg_replace('#<creationDate>[^<]*</creationDate>#', '<creationDate>' . $version['credate'] . '</creationDate>', $fileContents);
-		file_put_contents($rootPath . $languageXmlFile, $fileContents);
-	}
-}
-
-// Updates the version and creation date in language installer xml file.
-if (file_exists($rootPath . $installerXmlFile))
-{
-	$fileContents = file_get_contents($rootPath . $installerXmlFile);
-	$fileContents = preg_replace('#<version>[^<]*</version>#', '<version>' . $version['install_version'] . '</version>', $fileContents);
-	$fileContents = preg_replace('#<creationDate>[^<]*</creationDate>#', '<creationDate>' . $version['install_credate'] . '</creationDate>', $fileContents);
-	file_put_contents($rootPath . $installerXmlFile, $fileContents);
-}
-
-// Updates the version and creation date in language package xml file.
-if (file_exists($rootPath . $languagePackXmlFile))
-{
-	$fileContents = file_get_contents($rootPath . $languagePackXmlFile);
-	$fileContents = preg_replace('#<version>[^<]*</version>#', '<version>' . $version['full'] . '</version>', $fileContents);
-	$fileContents = preg_replace('#<creationDate>[^<]*</creationDate>#', '<creationDate>' . $version['credate'] . '</creationDate>', $fileContents);
-	file_put_contents($rootPath . $languagePackXmlFile, $fileContents);
-}
-
-// Updates the copyright date in core files.
-$changedFilesCopyrightDate = 0;
-$year                      = date('Y');
-$directory                 = new RecursiveDirectoryIterator($rootPath);
-$iterator                  = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST);
-
-foreach ($iterator as $file)
-{
-	if ($file->isFile())
-	{
-		$filePath     = $file->getPathname();
-		$relativePath = str_replace($rootPath, '', $filePath);
-
-		// Exclude certain extensions.
-		if (preg_match('#\.(png|jpeg|jpg|gif|bmp|ico|webp|svg|woff|woff2|ttf|eot)$#', $filePath))
-		{
-			continue;
-		}
-
-		// Exclude certain directories.
-		$continue = true;
-
-		foreach ($directoryLoopExcludeDirectories as $excludeDirectory)
-		{
-			if (preg_match('#^' . preg_quote($excludeDirectory) . '#', $relativePath))
-			{
-				$continue = false;
-				break;
-			}
-		}
-
-		if ($continue)
-		{
-			$changeCopyrightDate = false;
-
-			// Load the file.
-			$fileContents = file_get_contents($filePath);
-
-			// Check if need to change the copyright date for Joomla! Malaysia.
-			if (preg_match('#\(C\)\s+[0-9]{4}\s+Joomla!\s+Malaysia#', $fileContents) && !preg_match('#\(C\)\s+' . $year . '\s+Joomla!\s+Malaysia#', $fileContents))
-			{
-				$changeCopyrightDate = true;
-				$fileContents = preg_replace('#\(C\)\s+[0-9]{4}\s+Joomla!\s+Malaysia#', '(C) ' . $year . ' Joomla! Malaysia', $fileContents);
-				$changedFilesCopyrightDate++;
-			}
-
-			// Save the file.
-			if ($changeCopyrightDate)
-			{
-				echo $filePath;
-				file_put_contents($filePath, $fileContents);
-			}
-		}
-	}
-}
-
-if ($changedFilesCopyrightDate > 0)
-{
-	echo '- Copyright Date changed in ' . $changedFilesCopyrightDate . ' files.' . PHP_EOL;
-	echo PHP_EOL;
-}
-
-echo 'Version bump complete!' . PHP_EOL;
+echo "Joomla 5 package: {$full['j5']}\n";
+echo "Joomla 6 package: {$full['j6']}\n";
+echo "Next: update CHANGELOG.md and RELEASE_NOTES_DRAFT.md, run ./build.ps1, commit, then tag {$tag}\n";

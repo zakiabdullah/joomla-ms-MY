@@ -8,6 +8,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$script:SourceDate = $null
 
 function Write-Log {
     param(
@@ -26,6 +27,42 @@ function Write-Log {
         'WARN' { Write-Warning "[$timestamp] [WARN]  $Message" }
         'ERROR' { Write-Error "[$timestamp] [ERROR] $Message" }
     }
+}
+
+function Get-SourceDate {
+    <#
+    .SYNOPSIS
+    Returns the timestamp used for reproducible builds (UTC).
+
+    .DESCRIPTION
+    Uses SOURCE_DATE_EPOCH when set (https://reproducible-builds.org/specs/source-date-epoch/),
+    otherwise the commit time of HEAD, otherwise the current time. Zip entry times and
+    manifest creation dates come from this value, so the same commit always produces
+    byte-identical packages locally and in CI.
+    #>
+    if ($script:SourceDate) {
+        return $script:SourceDate
+    }
+
+    $epoch = $env:SOURCE_DATE_EPOCH
+
+    if (-not $epoch) {
+        try {
+            $epoch = (& git -C $PSScriptRoot log -1 --format=%ct 2>$null)
+        }
+        catch {
+            $epoch = $null
+        }
+    }
+
+    if ($epoch -and "$epoch".Trim() -match '^\d+$') {
+        $script:SourceDate = [DateTimeOffset]::FromUnixTimeSeconds([long]"$epoch".Trim())
+    }
+    else {
+        $script:SourceDate = [DateTimeOffset]::UtcNow
+    }
+
+    return $script:SourceDate
 }
 
 function Escape-Xml {
@@ -106,7 +143,7 @@ function Get-MetadataFromPackageXml {
         License         = [string]$xml.extension.license
         PackageBaseName = [string]$xml.extension.packagename
         BaseVersion     = [string]$xml.extension.version
-        CreationDate    = (Get-Date -Format 'yyyy-MM-dd')
+        CreationDate    = (Get-SourceDate).ToString('yyyy-MM-dd')
         MinimumPhp      = '8.1.0'
     }
 }
@@ -264,8 +301,31 @@ function Copy-FilesToContentRoot {
         $targetFile = Join-Path $DestinationContentRoot ($file.Relative -replace '/', [System.IO.Path]::DirectorySeparatorChar)
         $targetDir = Split-Path -Parent $targetFile
         Ensure-Directory -Path $targetDir
-        Copy-Item -Path $file.FullName -Destination $targetFile -Force
+        Copy-NormalizedFile -Source $file.FullName -Destination $targetFile
     }
+}
+
+function Copy-NormalizedFile {
+    <#
+    .SYNOPSIS
+    Copies a file, converting CRLF to LF for text files so packages built from a
+    Windows working copy are identical to packages built in CI.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][string]$Source,
+        [Parameter(Mandatory = $true)][string]$Destination
+    )
+
+    $textExtensions = @('.ini', '.xml', '.php', '.txt', '.html', '.css', '.js', '.json')
+
+    if ($textExtensions -notcontains ([System.IO.Path]::GetExtension($Source)).ToLowerInvariant()) {
+        Copy-Item -Path $Source -Destination $Destination -Force
+        return
+    }
+
+    $bytes = [System.IO.File]::ReadAllBytes($Source)
+    $text = [System.Text.Encoding]::UTF8.GetString($bytes) -replace "`r`n", "`n"
+    [System.IO.File]::WriteAllBytes($Destination, (New-Object System.Text.UTF8Encoding($false)).GetBytes($text))
 }
 
 function Apply-TargetOverrides {
@@ -378,7 +438,7 @@ function New-LanguageInstallManifest {
         '</extension>'
     )
 
-    Set-Content -Path $OutputPath -Value ($manifest -join "`n") -Encoding UTF8
+    [System.IO.File]::WriteAllText($OutputPath, (($manifest -join "`n") + "`n"), (New-Object System.Text.UTF8Encoding($false)))
 }
 
 function New-LanguageMetadataManifest {
@@ -422,7 +482,7 @@ function New-LanguageMetadataManifest {
         '</metafile>'
     )
 
-    Set-Content -Path $OutputPath -Value ($manifest -join "`n") -Encoding UTF8
+    [System.IO.File]::WriteAllText($OutputPath, (($manifest -join "`n") + "`n"), (New-Object System.Text.UTF8Encoding($false)))
 }
 
 function New-PackageManifest {
@@ -481,7 +541,7 @@ function New-PackageManifest {
         '</extension>'
     )
 
-    Set-Content -Path $OutputPath -Value ($manifest -join "`n") -Encoding UTF8
+    [System.IO.File]::WriteAllText($OutputPath, (($manifest -join "`n") + "`n"), (New-Object System.Text.UTF8Encoding($false)))
 }
 
 function Set-ScriptMinimumJoomla {
@@ -491,7 +551,7 @@ function Set-ScriptMinimumJoomla {
         [Parameter(Mandatory = $true)][int]$JoomlaMajor
     )
 
-    $content = Get-Content -Path $SourcePath -Raw -Encoding UTF8
+    $content = (Get-Content -Path $SourcePath -Raw -Encoding UTF8) -replace "`r`n", "`n"
 
     $minimumPattern = '\$this->minimumJoomla\s*=\s*''[^'']+'';'
 
@@ -500,7 +560,7 @@ function Set-ScriptMinimumJoomla {
         $content = [regex]::Replace($content, $minimumPattern, $replacement)
     }
 
-    Set-Content -Path $DestinationPath -Value $content -Encoding UTF8
+    [System.IO.File]::WriteAllText($DestinationPath, $content, (New-Object System.Text.UTF8Encoding($false)))
 }
 
 function Compress-FolderContent {
@@ -513,13 +573,44 @@ function Compress-FolderContent {
         Remove-Item -Path $ZipPath -Force
     }
 
-    $paths = Get-ChildItem -Path $SourceFolder -Force | Select-Object -ExpandProperty FullName
+    $files = @(Get-ChildItem -Path $SourceFolder -Recurse -File -Force |
+        ForEach-Object {
+            [PSCustomObject]@{
+                FullName = $_.FullName
+                Relative = Get-RelativeUnixPath -BasePath $SourceFolder -FullPath $_.FullName
+            }
+        } |
+        Sort-Object -Property Relative -CaseSensitive)
 
-    if (-not $paths -or $paths.Count -eq 0) {
+    if ($files.Count -eq 0) {
         throw "Cannot create zip from empty folder: $SourceFolder"
     }
 
-    Compress-Archive -Path $paths -DestinationPath $ZipPath -Force
+    # Reproducible zip: fixed entry order, fixed timestamps, no directory entries
+    Add-Type -AssemblyName System.IO.Compression
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+
+    $timestamp = Get-SourceDate
+    $archive = [System.IO.Compression.ZipFile]::Open($ZipPath, [System.IO.Compression.ZipArchiveMode]::Create)
+
+    try {
+        foreach ($file in $files) {
+            $entry = $archive.CreateEntry($file.Relative, [System.IO.Compression.CompressionLevel]::Optimal)
+            $entry.LastWriteTime = $timestamp
+            $target = $entry.Open()
+
+            try {
+                $bytes = [System.IO.File]::ReadAllBytes($file.FullName)
+                $target.Write($bytes, 0, $bytes.Length)
+            }
+            finally {
+                $target.Dispose()
+            }
+        }
+    }
+    finally {
+        $archive.Dispose()
+    }
 }
 
 function Validate-XmlFile {
