@@ -7,8 +7,11 @@ perubahan diterima.
 ## Sebelum mula
 
 1. Baca [GLOSSARY.md](GLOSSARY.md). Ia mengandungi istilah standard dan panduan gaya.
-2. Untuk perubahan kecil, contohnya membetulkan satu rentetan, terus hantar Pull Request.
+2. Untuk perubahan kecil, contohnya membetulkan satu rentetan, terus hantar Pull Request **ke cabang `j5`**.
 3. Untuk menukar istilah yang digunakan di banyak tempat, buka Issue dahulu.
+4. Senarai rentetan yang perlu diterjemah ada dalam Issue berlabel
+   [`sync`](https://github.com/zakiabdullah/joomla-ms-MY/issues?q=is%3Aopen+label%3Async).
+   Issue ini dibuka dan dikemas kini secara automatik setiap minggu.
 
 ## Struktur repositori
 
@@ -25,8 +28,9 @@ perubahan diterima.
 
 Pohon fail di atas digunakan untuk membina **kedua-dua** pakej
 `pkg_ms-MY_j5.zip` (Joomla 5) dan `pkg_ms-MY_j6.zip` (Joomla 6). Cabang `j5`
-ialah sumber utama. Kunci yang hanya wujud dalam satu versi tidak mendatangkan
-masalah, kerana Joomla mengabaikan kunci yang tidak digunakan.
+ialah sumber utama. Cabang `j6` diselaraskan dengan `j5` secara automatik, jadi
+**jangan commit terus ke `j6`**. Kunci yang hanya wujud dalam satu versi tidak
+mendatangkan masalah, kerana Joomla mengabaikan kunci yang tidak digunakan.
 
 Jika **nilai** sesuatu kunci mesti berbeza antara versi, contohnya Joomla 6
 menambah placeholder `%2$s`, simpan:
@@ -70,9 +74,33 @@ sama seperti yang dibuat oleh build.
 
 | Aliran kerja | Bila | Gagal jika |
 |---|---|---|
-| **Translation QA** | Push/PR yang mengubah `.ini` | Ralat format, atau placeholder tidak sepadan dengan en-GB `5.4-dev`/`6.2-dev` |
+| **Translation QA** | Setiap push/PR | Ralat format, istilah yang dilarang oleh glosari, atau placeholder tidak sepadan dengan en-GB `5.4-dev`/`6.2-dev` |
 | **Build Joomla Language Pack** | Push/PR/tag | Build gagal atau pakej kosong |
-| **Sync Check with Joomla CMS** | Setiap Ahad | Hanya memberi amaran tentang kunci baharu daripada Joomla (atau gagal dalam mod `strict`) |
+| **Sync Check with Joomla CMS** | Setiap Ahad | Membuka/mengemas kini Issue `sync` jika Joomla menambah rentetan baharu, dan menutupnya apabila lengkap |
+| **Sync j6 with j5** | Push ke `j5` | `j6` mengandungi commit yang tiada dalam `j5` |
+
+Merge ke `j5` memerlukan semakan **Translation QA** dan **Build** lulus.
+
+### Istilah yang dilarang
+
+`build/glossary-rules.json` menyenaraikan istilah yang tidak boleh digunakan
+(cth. *perihalan*, *penggantian*, *emel*, *baru* untuk "new"). Semakan hanya
+melihat teks yang dibaca pengguna, jadi tag HTML dan URL diabaikan. Untuk
+pengecualian yang wajar, tambah nama kunci ke senarai `allow`.
+
+### Membuang kunci lapuk
+
+Apabila Joomla membuang rentetan, keluarkan kunci yang tiada dalam **mana-mana**
+versi yang disokong:
+
+```bash
+# Laporan sahaja
+php build/prune-obsolete.php --ref=../cms-5.4.10 --ref=../cms-5.4-dev \
+                             --ref=../cms-6.2.0  --ref=../cms-6.2-dev
+
+# Ubah fail: tambah --write pada arahan yang sama
+php build/prune-obsolete.php ... --write
+```
 
 ## Proses keluaran (penyelenggara)
 

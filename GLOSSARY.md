@@ -6,6 +6,9 @@ ini. Gunakannya secara konsisten. Jika anda ingin menukar sesuatu istilah, buka
 [Issue](https://github.com/zakiabdullah/joomla-ms-MY/issues) dahulu supaya
 perubahan dibuat serentak di semua fail.
 
+Istilah yang dilarang dikuatkuasakan secara automatik oleh
+[`build/glossary-rules.json`](build/glossary-rules.json): CI akan gagal jika ia digunakan.
+
 ## Panduan gaya
 
 | Perkara | Peraturan | Contoh |

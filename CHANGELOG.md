@@ -5,6 +5,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Tags use `<Joomla 5 version>v<n>`; every release ships both the Joomla 5
 and the Joomla 6 package.
 
+## [Unreleased]
+
+### Removed
+- 626 obsolete keys and `api/language/ms-MY/lib_joomla.ini`. None of them exist in Joomla 5.4.10,
+  5.4-dev, 6.2.0 or 6.2-dev, including wrong `TPL_CASSIOPEIA_POSITION_*` duplicates with
+  underscores instead of hyphens.
+
+### Fixed
+- "baharu" instead of "baru" for *new* in the site language file, "Pemalam" instead of
+  "Plugin" in plugin descriptions, "penerangan" in sample data.
+
+### Tooling
+- Glossary rules (`build/glossary-rules.json`) are enforced in CI.
+- `build/prune-obsolete.php` removes keys that no supported Joomla version uses.
+- The weekly sync check opens, updates and closes a `sync` issue per Joomla branch.
+- `j6` is merged from `j5` automatically on every push.
+- Translation QA runs on every push/PR and is required for merging into `j5`.
+
 ## [5.4.10v1] - 2026-11-15
 
 Packages: `pkg_ms-MY_j5.zip` 5.4.10.1 (Joomla 5.4.10) and `pkg_ms-MY_j6.zip` 6.2.0.1 (Joomla 6.2.0).
@@ -40,6 +58,7 @@ Packages: `pkg_ms-MY_j5.zip` 5.4.10.1 (Joomla 5.4.10) and `pkg_ms-MY_j6.zip` 6.2
 ## [5.4.8v1] - 2026-08-21
 - Malay language pack for Joomla 5.4.8 and 6.1.3.
 
+[Unreleased]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.10v1...j5
 [5.4.10v1]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.9v2...5.4.10v1
 [5.4.9v2]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.9v1...5.4.9v2
 [5.4.9v1]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.8v1...5.4.9v1

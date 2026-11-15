@@ -9,6 +9,7 @@
  *   - keys are upper case, no duplicate keys
  *   - no unescaped double quotes inside a value
  *   - file parses with parse_ini_file(INI_SCANNER_RAW)
+ *   - no banned terms from build/glossary-rules.json (see GLOSSARY.md)
  *
  * Reference checks (with --ref=<path to a joomla-cms checkout>):
  *   - en-GB files without a ms-MY counterpart
@@ -17,7 +18,7 @@
  *   - obsolete ms-MY keys (reported with --verbose only)
  *
  * Usage:
- *   php build/check-translation.php [--ref=../joomla-cms] [--target=j6] [--strict] [--verbose] [--summary=FILE]
+ *   php build/check-translation.php [--ref=../joomla-cms] [--target=j6] [--strict] [--verbose] [--summary=FILE] [--json=FILE]
  *
  *   --target applies overrides/<target>/ on top of the shared files, exactly as
  *   build.ps1 does, before comparing with the reference.
@@ -33,10 +34,10 @@ declare(strict_types=1);
 const SECTIONS = ['language', 'administrator/language', 'api/language', 'installation/language'];
 const TAG      = 'ms-MY';
 
-$options = getopt('', ['ref:', 'target:', 'strict', 'verbose', 'summary:', 'help']);
+$options = getopt('', ['ref:', 'target:', 'strict', 'verbose', 'summary:', 'json:', 'help']);
 
 if (isset($options['help'])) {
-    fwrite(STDOUT, "Usage: php build/check-translation.php [--ref=PATH] [--target=j5|j6] [--strict] [--verbose] [--summary=FILE]\n");
+    fwrite(STDOUT, "Usage: php build/check-translation.php [--ref=PATH] [--target=j5|j6] [--strict] [--verbose] [--summary=FILE] [--json=FILE]\n");
     exit(0);
 }
 
@@ -151,6 +152,29 @@ function placeholders(string $value): array
     return $out;
 }
 
+// Terminology rules from GLOSSARY.md
+$glossary      = json_decode((string) @file_get_contents("{$root}/build/glossary-rules.json"), true) ?: ['rules' => [], 'allow' => []];
+$glossaryAllow = array_flip($glossary['allow'] ?? []);
+
+/**
+ * Report banned terms (see build/glossary-rules.json) in the visible text of a value.
+ */
+function checkGlossary(array $rules, array $allow, string $rel, string $key, string $value, int $line, array &$errors, bool $isCi): void
+{
+    if (isset($allow[$key])) {
+        return;
+    }
+
+    // Ignore markup and URLs: only the text a user reads must follow the glossary
+    $text = preg_replace(['/<[^>]*>/u', '#\b(?:https?://|index\.php\?)\S+#u'], ' ', $value);
+
+    foreach ($rules as $rule) {
+        if (preg_match('/' . $rule['pattern'] . '/iu', $text, $m)) {
+            report($errors, 'error', $rel, $line, "Glossary: \"{$m[0]}\" in {$key}, use \"{$rule['use']}\" ({$rule['en']})", $isCi);
+        }
+    }
+}
+
 // Override files must be well-formed and must override an existing file
 $overrideFiles = array_merge(
     glob("{$root}/overrides/*/language/" . TAG . '/*.ini') ?: [],
@@ -165,8 +189,14 @@ foreach ($overrideFiles as $path) {
         report($errors, 'error', $rel, null, "Override has no matching file {$shared}", $isCi);
     }
 
-    foreach (parseStrict($path)[2] as [$n, $msg]) {
+    [$ovValues, $ovLines, $ovProblems] = parseStrict($path);
+
+    foreach ($ovProblems as [$n, $msg]) {
         report($errors, 'error', $rel, $n, $msg, $isCi);
+    }
+
+    foreach ($ovValues as $key => $value) {
+        checkGlossary($glossary['rules'], $glossaryAllow, $rel, $key, $value, $ovLines[$key], $errors, $isCi);
     }
 }
 
@@ -181,12 +211,16 @@ foreach (SECTIONS as $section) {
 
     foreach ($msFiles as $path) {
         $rel = "{$section}/" . TAG . '/' . basename($path);
-        [$values, , $problems] = parseStrict($path);
+        [$values, $valueLines, $problems] = parseStrict($path);
         $stats['files']++;
         $stats['keys'] += count($values);
 
         foreach ($problems as [$n, $msg]) {
             report($errors, 'error', $rel, $n, $msg, $isCi);
+        }
+
+        foreach ($values as $key => $value) {
+            checkGlossary($glossary['rules'], $glossaryAllow, $rel, $key, $value, $valueLines[$key], $errors, $isCi);
         }
     }
 
@@ -296,6 +330,21 @@ if (isset($options['summary'])) {
     }
 
     file_put_contents((string) $options['summary'], implode("\n", $md) . "\n", FILE_APPEND);
+}
+
+if (isset($options['json'])) {
+    $toList = static fn (array $items) => array_map(
+        static fn ($i) => ['file' => $i[0], 'line' => $i[1], 'message' => $i[2]],
+        $items
+    );
+
+    file_put_contents((string) $options['json'], json_encode([
+        'reference' => $ref !== null ? basename($ref) : null,
+        'target'    => $target,
+        'stats'     => $stats,
+        'errors'    => $toList($errors),
+        'warnings'  => $toList($warnings),
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n");
 }
 
 if ($errors || ($strict && $warnings)) {
