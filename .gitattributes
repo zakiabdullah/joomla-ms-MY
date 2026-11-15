@@ -1,0 +1,21 @@
+# Normalise line endings: language files are always stored with LF
+* text=auto eol=lf
+
+*.ini   text eol=lf
+*.txt   text eol=lf
+*.xml   text eol=lf
+*.php   text eol=lf
+*.md    text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.ps1   text eol=lf
+
+*.zip   binary
+*.png   binary
+
+# Keep development files out of `git archive` exports
+/.github            export-ignore
+/tests              export-ignore
+/.editorconfig      export-ignore
+/.gitattributes     export-ignore
+/.gitignore         export-ignore

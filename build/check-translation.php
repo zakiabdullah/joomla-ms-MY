@@ -1,0 +1,305 @@
+<?php
+
+/**
+ * Translation quality checker for the ms-MY Joomla language pack.
+ *
+ * Local checks (always run):
+ *   - UTF-8 validity, no BOM
+ *   - every non-comment line is KEY="value" (Joomla's strict INI format)
+ *   - keys are upper case, no duplicate keys
+ *   - no unescaped double quotes inside a value
+ *   - file parses with parse_ini_file(INI_SCANNER_RAW)
+ *
+ * Reference checks (with --ref=<path to a joomla-cms checkout>):
+ *   - en-GB files without a ms-MY counterpart
+ *   - en-GB keys missing from ms-MY
+ *   - sprintf placeholder mismatch (%s, %d, %1$s ...)
+ *   - obsolete ms-MY keys (reported with --verbose only)
+ *
+ * Usage:
+ *   php build/check-translation.php [--ref=../joomla-cms] [--target=j6] [--strict] [--verbose] [--summary=FILE]
+ *
+ *   --target applies overrides/<target>/ on top of the shared files, exactly as
+ *   build.ps1 does, before comparing with the reference.
+ *
+ * Exit code: 1 on errors (or on warnings with --strict), 0 otherwise.
+ *
+ * @copyright  (C) 2026 Joomla! Malaysia
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
+
+declare(strict_types=1);
+
+const SECTIONS = ['language', 'administrator/language', 'api/language', 'installation/language'];
+const TAG      = 'ms-MY';
+
+$options = getopt('', ['ref:', 'target:', 'strict', 'verbose', 'summary:', 'help']);
+
+if (isset($options['help'])) {
+    fwrite(STDOUT, "Usage: php build/check-translation.php [--ref=PATH] [--target=j5|j6] [--strict] [--verbose] [--summary=FILE]\n");
+    exit(0);
+}
+
+$root    = dirname(__DIR__);
+$ref     = isset($options['ref']) ? rtrim((string) $options['ref'], '/\\') : null;
+$target  = isset($options['target']) ? (string) $options['target'] : null;
+$strict  = isset($options['strict']);
+$verbose = isset($options['verbose']);
+$isCi    = getenv('GITHUB_ACTIONS') === 'true';
+
+$errors   = [];
+$warnings = [];
+$stats    = ['files' => 0, 'keys' => 0, 'missing_files' => 0, 'missing_keys' => 0, 'placeholders' => 0, 'obsolete' => 0];
+
+/**
+ * Report a problem; emits a GitHub annotation when running in Actions.
+ */
+function report(array &$bucket, string $level, string $file, ?int $line, string $message, bool $isCi): void
+{
+    $bucket[] = [$file, $line, $message];
+
+    if ($isCi) {
+        $loc = 'file=' . $file . ($line ? ',line=' . $line : '');
+        fwrite(STDOUT, "::{$level} {$loc}::{$message}\n");
+    }
+}
+
+/**
+ * Parse an INI file in Joomla's strict format.
+ *
+ * @return array{0: array<string,string>, 1: array<string,int>, 2: list<array{int,string}>}
+ *         [key => value], [key => line number], [ [line, problem] ... ]
+ */
+function parseStrict(string $path): array
+{
+    $values   = [];
+    $lines    = [];
+    $problems = [];
+    $content  = (string) file_get_contents($path);
+
+    if (str_starts_with($content, "\xEF\xBB\xBF")) {
+        $problems[] = [1, 'File starts with a UTF-8 BOM'];
+        $content    = substr($content, 3);
+    }
+
+    if (!mb_check_encoding($content, 'UTF-8')) {
+        $problems[] = [1, 'File is not valid UTF-8'];
+    }
+
+    foreach (preg_split('/\r\n|\n|\r/', $content) as $i => $raw) {
+        $n    = $i + 1;
+        $line = trim($raw);
+
+        if ($line === '' || $line[0] === ';' || $line[0] === '[') {
+            continue;
+        }
+
+        // A trailing "; comment" after the closing quote is allowed (en-GB uses it too)
+        if (!preg_match('/^([^=\s]+)\s*=\s*"(.*)"\s*(?:;.*)?$/', $line, $m)) {
+            $problems[] = [$n, 'Line is not in KEY="value" format'];
+            continue;
+        }
+
+        [, $key, $value] = $m;
+
+        if ($key !== strtoupper($key) || !preg_match('/^[A-Z0-9_.:\-]+$/', $key)) {
+            $problems[] = [$n, "Invalid key name: {$key}"];
+        }
+
+        // A double quote is only allowed when escaped as \"
+        if (preg_match('/(?<!\\\\)"/', $value)) {
+            $problems[] = [$n, "Unescaped double quote in {$key} (use \\\")"];
+        }
+
+        if (isset($values[$key])) {
+            $problems[] = [$n, "Duplicate key {$key} (first defined on line {$lines[$key]})"];
+        }
+
+        $values[$key] = $value;
+        $lines[$key] ??= $n;
+    }
+
+    if (@parse_ini_file($path, false, INI_SCANNER_RAW) === false) {
+        $problems[] = [1, 'parse_ini_file() failed'];
+    }
+
+    return [$values, $lines, $problems];
+}
+
+/**
+ * Extract tokens that must survive translation unchanged:
+ *   - sprintf placeholders as used by Joomla (%s, %d, %u, %f, %1$s, %02d ...)
+ *   - JavaScript tokens in braces ({file}, {remaining} ...)
+ * The escaped "%%", plain-text percentages ("50% or") and URL encoding ("%3F")
+ * are ignored.
+ *
+ * @return list<string>
+ */
+function placeholders(string $value): array
+{
+    $value = str_replace('%%', '', $value);
+    preg_match_all('/%(?:\d+\$)?(?:0\d+)?(?:\.\d+)?[sduf](?![A-Za-z0-9])/', $value, $m);
+
+    // Normalise: "%s" and "%1$s" are equivalent (Malay word order often differs)
+    $out = array_map(static fn ($p) => preg_replace('/^%\d+\$/', '%', $p), $m[0]);
+
+    // Named tokens are replaced by name, so only their presence matters, not the count
+    preg_match_all('/\{[a-z][a-zA-Z0-9_]*\}/', $value, $js);
+    $out = array_merge($out, array_unique($js[0]));
+    sort($out);
+
+    return $out;
+}
+
+// Override files must be well-formed and must override an existing file
+$overrideFiles = array_merge(
+    glob("{$root}/overrides/*/language/" . TAG . '/*.ini') ?: [],
+    glob("{$root}/overrides/*/*/language/" . TAG . '/*.ini') ?: []
+);
+
+foreach ($overrideFiles as $path) {
+    $rel    = substr(str_replace('\\', '/', $path), strlen(str_replace('\\', '/', $root)) + 1);
+    $shared = preg_replace('#^overrides/[^/]+/#', '', $rel);
+
+    if (!is_file("{$root}/{$shared}")) {
+        report($errors, 'error', $rel, null, "Override has no matching file {$shared}", $isCi);
+    }
+
+    foreach (parseStrict($path)[2] as [$n, $msg]) {
+        report($errors, 'error', $rel, $n, $msg, $isCi);
+    }
+}
+
+foreach (SECTIONS as $section) {
+    $msDir = "{$root}/{$section}/" . TAG;
+
+    if (!is_dir($msDir)) {
+        continue;
+    }
+
+    $msFiles = glob("{$msDir}/*.ini") ?: [];
+
+    foreach ($msFiles as $path) {
+        $rel = "{$section}/" . TAG . '/' . basename($path);
+        [$values, , $problems] = parseStrict($path);
+        $stats['files']++;
+        $stats['keys'] += count($values);
+
+        foreach ($problems as [$n, $msg]) {
+            report($errors, 'error', $rel, $n, $msg, $isCi);
+        }
+    }
+
+    if ($ref === null) {
+        continue;
+    }
+
+    $enDir = "{$ref}/{$section}/en-GB";
+
+    if (!is_dir($enDir)) {
+        continue;
+    }
+
+    foreach (glob("{$enDir}/*.ini") ?: [] as $enPath) {
+        $name   = basename($enPath);
+        $msPath = "{$msDir}/{$name}";
+        $rel    = "{$section}/" . TAG . "/{$name}";
+        [$en]   = parseStrict($enPath);
+
+        if (!is_file($msPath)) {
+            $stats['missing_files']++;
+            report($warnings, 'warning', $rel, null, 'Missing file (' . count($en) . ' keys in en-GB)', $isCi);
+            continue;
+        }
+
+        [$ms, $msLines] = parseStrict($msPath);
+
+        // Overlay the version-specific overrides the build applies for this target
+        $overridePath = $target !== null ? "{$root}/overrides/{$target}/{$section}/" . TAG . "/{$name}" : null;
+
+        if ($overridePath !== null && is_file($overridePath)) {
+            [$ov] = parseStrict($overridePath);
+            $ms   = array_merge($ms, $ov);
+        }
+
+        foreach ($en as $key => $enValue) {
+            if (!array_key_exists($key, $ms)) {
+                $stats['missing_keys']++;
+                report($warnings, 'warning', $rel, null, "Missing key {$key}=\"{$enValue}\"", $isCi);
+                continue;
+            }
+
+            if (placeholders($enValue) !== placeholders($ms[$key])) {
+                $stats['placeholders']++;
+                $expected = implode(' ', placeholders($enValue)) ?: '(none)';
+                $actual   = implode(' ', placeholders($ms[$key])) ?: '(none)';
+                report($warnings, 'warning', $rel, $msLines[$key], "Placeholder mismatch in {$key}: en-GB has {$expected}, ms-MY has {$actual}", $isCi);
+            }
+        }
+
+        $obsolete = array_diff_key($ms, $en);
+        $stats['obsolete'] += count($obsolete);
+
+        if ($verbose && $obsolete) {
+            fwrite(STDOUT, "Note: {$rel} has " . count($obsolete) . " key(s) not in this en-GB reference\n");
+        }
+    }
+}
+
+// Human readable output (annotations already printed in CI)
+if (!$isCi) {
+    foreach ([['ERROR', $errors], ['WARN', $warnings]] as [$label, $list]) {
+        foreach ($list as [$file, $line, $msg]) {
+            fwrite(STDOUT, sprintf("[%s] %s%s: %s\n", $label, $file, $line ? ":{$line}" : '', $msg));
+        }
+    }
+}
+
+$summary = sprintf(
+    "Checked %d files / %d keys. Errors: %d. Warnings: %d%s",
+    $stats['files'],
+    $stats['keys'],
+    count($errors),
+    count($warnings),
+    $ref !== null
+        ? sprintf(' (missing files: %d, missing keys: %d, placeholder mismatches: %d, keys not in reference: %d)', $stats['missing_files'], $stats['missing_keys'], $stats['placeholders'], $stats['obsolete'])
+        : ''
+);
+
+fwrite(STDOUT, $summary . "\n");
+
+if (isset($options['summary'])) {
+    $md   = ["### ms-MY translation check" . ($ref !== null ? ' against `' . basename($ref) . '`' : ''), ''];
+    $md[] = '| Metric | Count |';
+    $md[] = '|---|---:|';
+    $md[] = "| Files checked | {$stats['files']} |";
+    $md[] = "| Keys checked | {$stats['keys']} |";
+    $md[] = '| Syntax / format errors | ' . count($errors) . ' |';
+
+    if ($ref !== null) {
+        $md[] = "| Missing files | {$stats['missing_files']} |";
+        $md[] = "| Missing keys | {$stats['missing_keys']} |";
+        $md[] = "| Placeholder mismatches | {$stats['placeholders']} |";
+    }
+
+    if ($warnings) {
+        $md[] = '';
+        $md[] = '<details><summary>Warnings</summary>';
+        $md[] = '';
+
+        foreach ($warnings as [$file, , $msg]) {
+            $md[] = '- `' . $file . '`: ' . str_replace('|', '\\|', $msg);
+        }
+
+        $md[] = '';
+        $md[] = '</details>';
+    }
+
+    file_put_contents((string) $options['summary'], implode("\n", $md) . "\n", FILE_APPEND);
+}
+
+if ($errors || ($strict && $warnings)) {
+    exit(1);
+}
+
+exit(0);

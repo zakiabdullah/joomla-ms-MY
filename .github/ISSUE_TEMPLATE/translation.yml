@@ -1,0 +1,33 @@
+name: Kesilapan terjemahan / Translation error
+description: Laporkan terjemahan yang salah, janggal atau tiada.
+labels: [translation]
+body:
+  - type: input
+    id: key
+    attributes:
+      label: Kunci bahasa (language key)
+      description: Jika tahu, cth. COM_CONTENT_SAVE_SUCCESS. Boleh dicari melalui Sistem → Pengatasan Bahasa.
+  - type: textarea
+    id: where
+    attributes:
+      label: Di mana teks ini dipaparkan?
+      description: Halaman / skrin, dan tangkapan skrin jika ada.
+    validations:
+      required: true
+  - type: input
+    id: current
+    attributes:
+      label: Teks semasa
+    validations:
+      required: true
+  - type: input
+    id: suggested
+    attributes:
+      label: Cadangan terjemahan
+  - type: input
+    id: version
+    attributes:
+      label: Versi Joomla dan versi pek bahasa
+      placeholder: cth. Joomla 6.2.0, ms-MY 6.2.0.1
+    validations:
+      required: true
