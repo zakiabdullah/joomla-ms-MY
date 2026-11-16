@@ -51,7 +51,7 @@ $isCi    = getenv('GITHUB_ACTIONS') === 'true';
 
 $errors   = [];
 $warnings = [];
-$stats    = ['files' => 0, 'keys' => 0, 'missing_files' => 0, 'missing_keys' => 0, 'placeholders' => 0, 'protected' => 0, 'obsolete' => 0];
+$stats    = ['files' => 0, 'keys' => 0, 'reference_keys' => 0, 'missing_files' => 0, 'missing_file_keys' => 0, 'missing_keys' => 0, 'placeholders' => 0, 'protected' => 0, 'obsolete' => 0];
 
 /**
  * Report a problem; emits a GitHub annotation when running in Actions.
@@ -293,9 +293,11 @@ foreach (SECTIONS as $section) {
         $msPath = "{$msDir}/{$name}";
         $rel    = "{$section}/" . TAG . "/{$name}";
         [$en, , , $enComments] = parseStrict($enPath);
+        $stats['reference_keys'] += count($en);
 
         if (!is_file($msPath)) {
             $stats['missing_files']++;
+            $stats['missing_file_keys'] += count($en);
             report($warnings, 'warning', $rel, null, 'Missing file (' . count($en) . ' keys in en-GB)', $isCi);
             continue;
         }
@@ -350,6 +352,22 @@ if (!$isCi) {
     }
 }
 
+/**
+ * Share of en-GB keys that have a ms-MY translation, rounded down to one decimal
+ * so that 100% is only shown when nothing is missing.
+ */
+function coverage(array $stats): string
+{
+    if ($stats['reference_keys'] === 0) {
+        return '0';
+    }
+
+    $translated = $stats['reference_keys'] - $stats['missing_keys'] - $stats['missing_file_keys'];
+    $percent    = floor($translated / $stats['reference_keys'] * 1000) / 10;
+
+    return rtrim(rtrim(number_format($percent, 1, '.', ''), '0'), '.');
+}
+
 $summary = sprintf(
     "Checked %d files / %d keys. Errors: %d. Warnings: %d%s",
     $stats['files'],
@@ -357,7 +375,7 @@ $summary = sprintf(
     count($errors),
     count($warnings),
     $ref !== null
-        ? sprintf(' (missing files: %d, missing keys: %d, placeholder mismatches: %d, protected terms: %d, keys not in reference: %d)', $stats['missing_files'], $stats['missing_keys'], $stats['placeholders'], $stats['protected'], $stats['obsolete'])
+        ? sprintf(' (coverage: %s%%, missing files: %d, missing keys: %d, placeholder mismatches: %d, protected terms: %d, keys not in reference: %d)', coverage($stats), $stats['missing_files'], $stats['missing_keys'], $stats['placeholders'], $stats['protected'], $stats['obsolete'])
         : ''
 );
 
@@ -372,6 +390,7 @@ if (isset($options['summary'])) {
     $md[] = '| Syntax / format errors | ' . count($errors) . ' |';
 
     if ($ref !== null) {
+        $md[] = '| Coverage | ' . coverage($stats) . '% |';
         $md[] = "| Missing files | {$stats['missing_files']} |";
         $md[] = "| Missing keys | {$stats['missing_keys']} |";
         $md[] = "| Placeholder mismatches | {$stats['placeholders']} |";
@@ -404,6 +423,7 @@ if (isset($options['json'])) {
         'reference' => $ref !== null ? basename($ref) : null,
         'target'    => $target,
         'stats'     => $stats,
+        'coverage'  => $ref !== null ? (float) coverage($stats) : null,
         'errors'    => $toList($errors),
         'warnings'  => $toList($warnings),
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n");

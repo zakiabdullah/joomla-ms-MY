@@ -1,6 +1,7 @@
 # Malay (ms-MY) Language Pack for Joomla! 5 and 6
 
 [![Build Joomla Language Pack](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/build.yml/badge.svg)](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/build.yml)
+[![Translated](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fzakiabdullah%2Fjoomla-ms-MY%2Fbadges%2Fcoverage.json)](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/compare-translation.yml)
 [![Translation QA](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/lint-ini.yml/badge.svg)](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/lint-ini.yml)
 [![Sync Check](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/compare-translation.yml/badge.svg)](https://github.com/zakiabdullah/joomla-ms-MY/actions/workflows/compare-translation.yml)
 [![GitHub release](https://img.shields.io/github/v/release/zakiabdullah/joomla-ms-MY?color=green&include_prereleases&label=release&style=for-the-badge)](https://github.com/zakiabdullah/joomla-ms-MY/releases)
