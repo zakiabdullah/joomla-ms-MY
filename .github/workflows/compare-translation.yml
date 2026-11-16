@@ -4,6 +4,12 @@ on:
   schedule:
     # Every Sunday at 00:00 UTC
     - cron: '0 0 * * 0'
+  # Also after translation changes, so issues and the coverage badge update right away
+  push:
+    branches: [j5]
+    paths:
+      - '**.ini'
+      - 'overrides/**'
   workflow_dispatch:
     inputs:
       strict:
@@ -27,11 +33,14 @@ jobs:
           # Development branches: catch new strings before the next release
           - branch: 5.4-dev
             target: j5
+            badge: true
           - branch: 6.2-dev
             target: j6
-          # Next minor in development
+            badge: true
+          # Next minor in development (not part of the coverage badge)
           - branch: 6.3-dev
             target: j6
+            badge: false
 
     steps:
       - name: Checkout ms-MY repository
@@ -115,6 +124,14 @@ jobs:
             gh issue create --title "$title" --label sync --body-file body.md
           fi
 
+      - name: Keep the result for the coverage badge
+        if: steps.cms.outcome == 'success' && matrix.badge
+        uses: actions/upload-artifact@v7
+        with:
+          name: qa-${{ matrix.branch }}
+          path: qa.json
+          retention-days: 7
+
       - name: Fail in strict mode
         if: steps.cms.outcome == 'success' && inputs.strict
         run: |
@@ -122,3 +139,55 @@ jobs:
             echo "::error::Missing or mismatched strings found against ${{ matrix.branch }}"
             exit 1
           fi
+
+  # Publishes badges/coverage.json for the README badge (shields.io endpoint).
+  # j5 is protected, so the data lives on a small separate branch named "badges".
+  badge:
+    name: Update coverage badge
+    needs: compare
+    if: always() && github.ref == 'refs/heads/j5'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download results
+        uses: actions/download-artifact@v8
+        with:
+          pattern: qa-*
+          path: results
+
+      - name: Compute coverage
+        id: coverage
+        run: |
+          # Lowest coverage of the current Joomla lines (5.4 and 6.2)
+          if ! ls results/*/qa.json >/dev/null 2>&1; then
+            echo "::warning::No comparison results; badge not updated."
+            exit 1
+          fi
+          value=$(jq -s 'map(.coverage) | min' results/*/qa.json)
+          color=$(jq -rn --argjson v "$value" 'if $v >= 100 then "brightgreen" elif $v >= 98 then "green" elif $v >= 90 then "yellow" else "orange" end')
+          jq -n --arg msg "${value}%" --arg color "$color"             '{schemaVersion: 1, label: "translated", message: $msg, color: $color}' > coverage.json
+          cat coverage.json
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to the badges branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current=$(curl -fsSL "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/badges/coverage.json" || true)
+          if [ "$current" = "$(cat coverage.json)" ]; then
+            echo "Badge unchanged (${{ steps.coverage.outputs.value }}%)."
+            exit 0
+          fi
+          mkdir publish && cp coverage.json publish/
+          cat > publish/README.md <<'MD'
+          Data for the README badges, written by the "Sync Check with Joomla CMS" workflow.
+          Do not edit by hand.
+          MD
+          cd publish
+          git init -q -b badges
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Translation coverage: ${{ steps.coverage.outputs.value }}%"
+          git push -f -q "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" badges

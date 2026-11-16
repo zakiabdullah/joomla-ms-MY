@@ -30,6 +30,8 @@ and the Joomla 6 package.
 - `build/bump.php` bumps both targets (config, package manifest, source manifests) in one command;
   the legacy `build/build.php` builder is removed.
 - PHP lint covers every PHP file on 8.1–8.4; Dependabot keeps GitHub Actions up to date.
+- README badge with the translation coverage against Joomla 5.4 and 6.2, updated by the sync
+  check (data on the `badges` branch).
 - The `j6` branch is generated from `j5` plus the Joomla 6 adjustments (overrides applied, 6.x
   manifests, `translationlist_6`, `minimumJoomla` 6.0), because Joomla core-translations reads it
   directly. CI runs on `j5` only.
