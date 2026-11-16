@@ -84,6 +84,7 @@ sama seperti yang dibuat oleh build.
 | **Translation QA** | Setiap push/PR | Ralat format, istilah yang dilarang oleh glosari, atau placeholder tidak sepadan dengan en-GB `5.4-dev`/`6.2-dev` |
 | **Build Joomla Language Pack** | Push/PR/tag | Build gagal atau pakej kosong |
 | **Sync Check with Joomla CMS** | Setiap Ahad | Membuka/mengemas kini Issue `sync` jika Joomla menambah rentetan baharu, dan menutupnya apabila lengkap |
+| **Sync Check** (juga) | Push `.ini` ke `j5` | Mengemas kini lencana liputan terjemahan dalam README (data dalam cabang `badges`) |
 | **Sync j6 with j5** | Push ke `j5` | Pohon `j6` yang dijana tidak sah untuk Joomla 6 (placeholder/istilah dilindungi) |
 
 Merge ke `j5` memerlukan semakan **Translation QA** dan **Build** lulus.
