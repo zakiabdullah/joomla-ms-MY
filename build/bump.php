@@ -5,7 +5,8 @@
  *
  * Updates:
  *   - build/build.config.json   packageVersion of the j5 and j6 targets (used by build.ps1)
- *   - pkg_ms-MY.xml             <version> (Joomla 5 package manifest kept in the repo)
+ *   - pkg_ms-MY.xml             <version> and <creationDate> (Joomla 5 package manifest)
+ *   - README.md                 package versions and file names in "Active Target Versions"
  *   - {site,administrator,api,installation} ms-MY install.xml / langmetadata.xml
  *                               <version> and <creationDate> of the source manifests
  *
@@ -80,8 +81,19 @@ json_decode((string) file_get_contents($config), flags: JSON_THROW_ON_ERROR);
 
 // 2. Repository package manifest (Joomla 5 line)
 replaceIn("{$root}/pkg_ms-MY.xml", '#<version>[^<]*</version>#', "<version>{$full['j5']}</version>");
+replaceIn("{$root}/pkg_ms-MY.xml", '#<creationDate>[^<]*</creationDate>#', "<creationDate>{$today}</creationDate>");
 
-// 3. Source manifests (the build regenerates them, keep them in sync for reference)
+// 2b. README: "Active Target Versions" table (package version and file name per target)
+foreach (['j5' => 5, 'j6' => 6] as $key => $major) {
+    $zip = "ms-MY_joomla_lang_full_{$options[$key]}v{$pack}.zip";
+    replaceIn(
+        "{$root}/README.md",
+        '/^\| `' . $key . '` \| ' . $major . ' \| [^|]+\| [^|]+\|$/m',
+        "| `{$key}` | {$major} | {$full[$key]} | `dist/{$zip}` |"
+    );
+}
+
+// 3. Source manifests (shipped as they are by build.ps1 and by Joomla core-translations)
 foreach (['language', 'administrator/language', 'api/language'] as $section) {
     foreach (['install.xml', 'langmetadata.xml'] as $file) {
         $path = "{$root}/{$section}/ms-MY/{$file}";
