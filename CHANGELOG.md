@@ -7,6 +7,11 @@ and the Joomla 6 package.
 
 ## [Unreleased]
 
+### Added
+- Terjemahan awal untuk 11 kunci baharu Joomla 6.3: pemilih fail, folder, imej dan video
+  (`JLIB_FORM_SELECT_*`, `JLIB_FORM_CHANGE_*`), dua ralat jenis menu, dan saiz ubah saiz imej
+  mengikut folder (`plg_media-action_resize`). Liputan 100% berbanding `6.3-dev`.
+
 ### Changed
 - Release packages use the official language pack names from core-translations, e.g.
   `ms-MY_joomla_lang_full_5.4.11v1.zip` and `ms-MY_joomla_lang_full_6.2.1v1.zip` instead of
