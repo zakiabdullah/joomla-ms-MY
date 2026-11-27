@@ -7,12 +7,25 @@ and the Joomla 6 package.
 
 ## [Unreleased]
 
+### Added
+- Terjemahan untuk enam kunci en-GB yang diperkenalkan atau belum disertakan dalam Joomla 5.4.11 dan 6.2.1.
+
+### Changed
+- Pakej disasarkan kepada Joomla 5.4.11 dan 6.2.1.
+- Pakej binaan tidak lagi menyertakan `installation_ms-MY.zip`. Client `installation` dipetakan
+  ke folder `installation/`, jadi pemasangannya mencipta semula folder itu pada laman produksi.
+- Manifest sumber `install.xml` menggunakan hak cipta Joomla! Malaysia dan `authorUrl` penuh.
+
 ### Removed
-- 626 obsolete keys and `api/language/ms-MY/lib_joomla.ini`. None of them exist in Joomla 5.4.10,
-  5.4-dev, 6.2.0 or 6.2-dev, including wrong `TPL_CASSIOPEIA_POSITION_*` duplicates with
+- 626 obsolete keys and `api/language/ms-MY/lib_joomla.ini`. None of them exist in Joomla 5.4.11,
+  5.4-dev, 6.2.1 or 6.2-dev, including wrong `TPL_CASSIOPEIA_POSITION_*` duplicates with
   underscores instead of hyphens.
 
 ### Fixed
+- Susun atur ZIP subpakej bahasa supaya sepadan dengan manifest rasmi Joomla (`<folder>/</folder>`).
+- Manifest sumber `install.xml` (site, administrator, api) kini memasang seluruh folder seperti
+  en-GB. Senarai fail lama merujuk `api/.../lib_joomla.ini` yang telah dipadam (pemasangan API
+  gagal) dan tertinggal 12 fail pentadbir, termasuk lawatan berpandu Joomla 6 dan PoW Captcha.
 - "baharu" instead of "baru" for *new* in the site language file, "Pemalam" instead of
   "Plugin" in plugin descriptions, "penerangan" in sample data.
 - "Pembalut" for the Wrapper component (same as the module), "Skema" in the Schema.org plugin,
@@ -20,6 +33,12 @@ and the Joomla 6 package.
 
 ### Tooling
 - Glossary rules (`build/glossary-rules.json`) are enforced in CI.
+- QA fails when a language `install.xml` lists a missing file or, without `<folder>/</folder>`,
+  leaves a file out.
+- `build/compare-ini.ps1` is removed; `build/check-translation.php --ref` covers it.
+- Every text file ends with a newline (`.editorconfig`), and new keys follow the en-GB order.
+- The deprecated `getIgnoredSearchWords()` in the administrator `localise.php` returns Malay
+  words (`dan`, `di`, `pada`) instead of the English ones.
 - `build/prune-obsolete.php` removes keys that no supported Joomla version uses.
 - The weekly sync check opens, updates and closes a `sync` issue per Joomla branch.
 - `j6` is merged from `j5` automatically on every push.

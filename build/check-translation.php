@@ -195,6 +195,42 @@ foreach (array_unique($xmlFiles) as $path) {
     }
 }
 
+// Language manifests: every listed file must exist (a missing one aborts the
+// Joomla installer), and without <folder>/</folder> every file must be listed
+foreach (['language', 'administrator/language', 'api/language'] as $section) {
+    $dir      = "{$root}/{$section}/" . TAG;
+    $manifest = "{$dir}/install.xml";
+    $rel      = "{$section}/" . TAG . '/install.xml';
+
+    if (!is_file($manifest) || ($xml = @simplexml_load_file($manifest)) === false) {
+        continue;
+    }
+
+    $listed = [];
+
+    foreach ($xml->files->filename ?? [] as $entry) {
+        $listed[(string) $entry] = true;
+
+        if (!is_file("{$dir}/" . (string) $entry)) {
+            report($errors, 'error', $rel, null, 'Listed file does not exist: ' . (string) $entry, $isCi);
+        }
+    }
+
+    $hasRootFolder = false;
+
+    foreach ($xml->files->folder ?? [] as $folder) {
+        $hasRootFolder = $hasRootFolder || trim((string) $folder) === '/';
+    }
+
+    if (!$hasRootFolder) {
+        foreach (glob("{$dir}/*") ?: [] as $path) {
+            if (is_file($path) && !isset($listed[basename($path)])) {
+                report($errors, 'error', $rel, null, 'File not listed in manifest (it would not be installed): ' . basename($path), $isCi);
+            }
+        }
+    }
+}
+
 // Override files must be well-formed and must override an existing file
 $overrideFiles = array_merge(
     glob("{$root}/overrides/*/language/" . TAG . '/*.ini') ?: [],
