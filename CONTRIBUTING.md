@@ -113,8 +113,10 @@ php build/prune-obsolete.php ... --write
 ## Proses keluaran (penyelenggara)
 
 1. Jalankan `php build/bump.php --j5=<versi> --j6=<versi> --pack=1`. Ia mengemas kini `build.config.json`, `pkg_ms-MY.xml` dan manifest sumber.
-2. Dalam [CHANGELOG.md](CHANGELOG.md), tukar tajuk `## [Unreleased]` kepada `## [<tag>] - <tarikh>`.
-   Bahagian ini menjadi badan GitHub Release secara automatik (`build/release-notes.php`).
+2. Dalam [CHANGELOG.md](CHANGELOG.md), tukar tajuk `## [Unreleased]` kepada `## [<tag>] - <tarikh>`,
+   kemudian jalankan `php build/changelog-xml.php` supaya `changelog.xml` (changelog dalam Joomla) dikemas kini.
+   Letakkan perubahan dalaman repo di bawah `### Tooling`; bahagian itu tidak dipaparkan kepada pengguna laman.
+   Seluruh bahagian `[<tag>]` menjadi badan GitHub Release secara automatik (`build/release-notes.php`).
 3. Jalankan `pwsh ./build.ps1` dan `php build/release-notes.php <tag>` untuk menguji.
    Build boleh dihasilkan semula: commit yang sama menghasilkan zip yang sama bait demi bait,
    jadi checksum tempatan boleh dibandingkan dengan `SHA256SUMS.txt` dalam Release.

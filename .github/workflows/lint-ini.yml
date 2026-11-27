@@ -28,6 +28,10 @@ jobs:
       - name: Check language files and XML manifests
         run: php build/check-translation.php --summary="$GITHUB_STEP_SUMMARY"
 
+      # pkg_ms-MY.xml <changelogurl> points to changelog.xml, generated from CHANGELOG.md
+      - name: Check changelog.xml is up to date
+        run: php build/changelog-xml.php --check
+
   parity:
     name: Parity with Joomla ${{ matrix.branch }}
     runs-on: ubuntu-latest
