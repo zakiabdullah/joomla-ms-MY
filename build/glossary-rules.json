@@ -7,7 +7,11 @@
     { "pattern": "(?<![-\\w])(?<!paling )baru(?![-\\w])(?!\\s+(?:di\\w+|sahaja|saja))", "use": "baharu", "en": "New ('baru' is only for 'just / recently')" },
     { "pattern": "\\bplugin\\b", "use": "pemalam", "en": "Plugin" },
     { "pattern": "\\b(?:tapak web|laman sesawang)\\b", "use": "laman web", "en": "Website" },
-    { "pattern": "\\bdilepaskan\\b", "use": "didaftar masuk", "en": "Checked in" }
+    { "pattern": "\\bdilepaskan\\b", "use": "didaftar masuk", "en": "Checked in" },
+    { "pattern": "\\b(?:di|ber)?persatu(?:an|kan)\\b", "use": "perkaitan / dikaitkan", "en": "Association" },
+    { "pattern": "\\bdisemak keluar\\b", "use": "didaftar keluar", "en": "Checked out" },
+    { "pattern": "\\b(?:pengisihan|pengaturan)\\b", "use": "susunan", "en": "Ordering" },
+    { "pattern": "\\b(?:capaian|jumlah dilihat)\\b", "use": "tontonan (Hits) / akses (Access)", "en": "Hits / Access" }
   ],
   "allow": []
 }

@@ -23,6 +23,15 @@ and the Joomla 6 package.
 
 ### Fixed
 - `SHA256SUMS.txt` is written with LF line endings, so `sha256sum -c` works on Linux and macOS.
+- Istilah diseragamkan merentas semua fail (154 baris) dan direkodkan dalam GLOSSARY.md:
+  - *Associations*: **Perkaitan** (bukan *Persatuan*, yang bermaksud kelab); *dikaitkan*, *berkaitan*.
+  - *Featured*: **Ditampilkan** (bukan *Pilihan*, yang juga bermaksud *Options*); *Feature*: **Tampilkan**,
+    *Unfeature*: **Nyahtampil**, *Unfeatured*: **Tidak Ditampilkan**.
+  - *Hits*: **Tontonan** (bukan *Capaian* / *Jumlah Dilihat*); *Access Levels*: **Tahap Akses**.
+  - *Checked out*: **Didaftar Keluar** (bukan *Disemak Keluar*); *Ordering*: **Susunan** (bukan
+    *Pengaturan* / *Pengisihan*); *Contact*: **Kenalan**; *Mobile*: **Telefon Bimbit**.
+  - GLOSSARY.md kini menetapkan *Enabled* = **Didayakan**, mengikut penggunaan dalam pek.
+- CI melarang *persatuan*, *disemak keluar*, *pengaturan*, *pengisihan*, *capaian* dan *jumlah dilihat*.
 
 ## [5.4.11v1] - 2026-11-27
 
