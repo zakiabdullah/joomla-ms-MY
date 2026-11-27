@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<changelogs>
+	<changelog>
+		<element>pkg_ms-MY</element>
+		<type>package</type>
+		<version>5.4.11.3</version>
+		<fix>
+			<item>Kemas kini 5.4.11.2 / 6.2.1.2 sentiasa muncul semula selepas dipasang: pakej v2 di downloads.joomla.org mengandungi manifest bertanda 5.4.11.1 / 6.2.1.1. Pakej v3 mempunyai versi yang betul, jadi kemas kini berhenti selepas dipasang.</item>
+			<item>Pakej v2 juga memasang installation_ms-MY.zip, yang mencipta semula folder installation/ pada laman. Pakej v3 hanya mengandungi laman, pentadbir dan API.</item>
+		</fix>
+		<addition>
+			<item>Terjemahan awal untuk 11 kunci baharu Joomla 6.3: pemilih fail, folder, imej dan video (JLIB_FORM_SELECT_*, JLIB_FORM_CHANGE_*), dua ralat jenis menu, dan saiz ubah saiz imej mengikut folder (plg_media-action_resize). Liputan 100% berbanding 6.3-dev.</item>
+			<item>Changelog pakej boleh dilihat dalam Joomla: Sistem → Urus → Sambungan → Changelog.</item>
+		</addition>
+		<change>
+			<item>Istilah diseragamkan merentas semua fail (147 baris dalam 34 fail) dan direkodkan dalam GLOSSARY.md:</item>
+			<item>Associations: Perkaitan (bukan Persatuan, yang bermaksud kelab); dikaitkan, berkaitan.</item>
+			<item>Featured: Ditampilkan (bukan Pilihan, yang juga bermaksud Options); Feature: Tampilkan, Unfeature: Nyahtampil, Unfeatured: Tidak Ditampilkan.</item>
+			<item>Hits: Tontonan (bukan Capaian / Jumlah Dilihat); Access Levels: Tahap Akses.</item>
+			<item>Checked out: Didaftar Keluar (bukan Disemak Keluar); Ordering: Susunan (bukan Pengaturan / Pengisihan); Contact: Kenalan; Mobile: Telefon Bimbit.</item>
+			<item>Penerangan pakej dan sub-pakej dalam bahasa Melayu, sama seperti pakej rasmi Joomla.</item>
+			<item>Nama fail pakej mengikut pakej bahasa rasmi dan menunjukkan versinya, contohnya ms-MY_joomla_lang_full_6.2.1v3.zip (sebelum ini pkg_ms-MY_j6.zip).</item>
+		</change>
+	</changelog>
+	<changelog>
+		<element>pkg_ms-MY</element>
+		<type>package</type>
+		<version>6.2.1.3</version>
+		<fix>
+			<item>Kemas kini 5.4.11.2 / 6.2.1.2 sentiasa muncul semula selepas dipasang: pakej v2 di downloads.joomla.org mengandungi manifest bertanda 5.4.11.1 / 6.2.1.1. Pakej v3 mempunyai versi yang betul, jadi kemas kini berhenti selepas dipasang.</item>
+			<item>Pakej v2 juga memasang installation_ms-MY.zip, yang mencipta semula folder installation/ pada laman. Pakej v3 hanya mengandungi laman, pentadbir dan API.</item>
+		</fix>
+		<addition>
+			<item>Terjemahan awal untuk 11 kunci baharu Joomla 6.3: pemilih fail, folder, imej dan video (JLIB_FORM_SELECT_*, JLIB_FORM_CHANGE_*), dua ralat jenis menu, dan saiz ubah saiz imej mengikut folder (plg_media-action_resize). Liputan 100% berbanding 6.3-dev.</item>
+			<item>Changelog pakej boleh dilihat dalam Joomla: Sistem → Urus → Sambungan → Changelog.</item>
+		</addition>
+		<change>
+			<item>Istilah diseragamkan merentas semua fail (147 baris dalam 34 fail) dan direkodkan dalam GLOSSARY.md:</item>
+			<item>Associations: Perkaitan (bukan Persatuan, yang bermaksud kelab); dikaitkan, berkaitan.</item>
+			<item>Featured: Ditampilkan (bukan Pilihan, yang juga bermaksud Options); Feature: Tampilkan, Unfeature: Nyahtampil, Unfeatured: Tidak Ditampilkan.</item>
+			<item>Hits: Tontonan (bukan Capaian / Jumlah Dilihat); Access Levels: Tahap Akses.</item>
+			<item>Checked out: Didaftar Keluar (bukan Disemak Keluar); Ordering: Susunan (bukan Pengaturan / Pengisihan); Contact: Kenalan; Mobile: Telefon Bimbit.</item>
+			<item>Penerangan pakej dan sub-pakej dalam bahasa Melayu, sama seperti pakej rasmi Joomla.</item>
+			<item>Nama fail pakej mengikut pakej bahasa rasmi dan menunjukkan versinya, contohnya ms-MY_joomla_lang_full_6.2.1v3.zip (sebelum ini pkg_ms-MY_j6.zip).</item>
+		</change>
+	</changelog>
+	<changelog>
+		<element>pkg_ms-MY</element>
+		<type>package</type>
+		<version>5.4.11.1</version>
+		<fix>
+			<item>Susun atur ZIP subpakej bahasa supaya sepadan dengan manifest rasmi Joomla (&lt;folder&gt;/&lt;/folder&gt;).</item>
+			<item>Manifest sumber install.xml (site, administrator, api) kini memasang seluruh folder seperti en-GB. Senarai fail lama merujuk api/.../lib_joomla.ini yang telah dipadam (pemasangan API gagal) dan tertinggal 12 fail pentadbir, termasuk lawatan berpandu Joomla 6 dan PoW Captcha.</item>
+			<item>&quot;baharu&quot; instead of &quot;baru&quot; for new in the site language file, &quot;Pemalam&quot; instead of &quot;Plugin&quot; in plugin descriptions, &quot;penerangan&quot; in sample data.</item>
+			<item>&quot;Pembalut&quot; for the Wrapper component (same as the module), &quot;Skema&quot; in the Schema.org plugin, &quot;Sistem - HTTP Headers&quot; plugin name (HTTP Headers stays untranslated as en-GB requires).</item>
+		</fix>
+		<addition>
+			<item>Terjemahan untuk enam kunci en-GB yang diperkenalkan atau belum disertakan dalam Joomla 5.4.11 dan 6.2.1.</item>
+		</addition>
+		<change>
+			<item>Pakej disasarkan kepada Joomla 5.4.11 dan 6.2.1.</item>
+			<item>Pakej binaan tidak lagi menyertakan installation_ms-MY.zip. Client installation dipetakan ke folder installation/, jadi pemasangannya mencipta semula folder itu pada laman produksi.</item>
+			<item>Manifest sumber install.xml menggunakan hak cipta Joomla! Malaysia dan authorUrl penuh.</item>
+		</change>
+		<remove>
+			<item>626 obsolete keys and api/language/ms-MY/lib_joomla.ini. None of them exist in Joomla 5.4.11, 5.4-dev, 6.2.1 or 6.2-dev, including wrong TPL_CASSIOPEIA_POSITION_* duplicates with underscores instead of hyphens.</item>
+		</remove>
+	</changelog>
+	<changelog>
+		<element>pkg_ms-MY</element>
+		<type>package</type>
+		<version>6.2.1.1</version>
+		<fix>
+			<item>Susun atur ZIP subpakej bahasa supaya sepadan dengan manifest rasmi Joomla (&lt;folder&gt;/&lt;/folder&gt;).</item>
+			<item>Manifest sumber install.xml (site, administrator, api) kini memasang seluruh folder seperti en-GB. Senarai fail lama merujuk api/.../lib_joomla.ini yang telah dipadam (pemasangan API gagal) dan tertinggal 12 fail pentadbir, termasuk lawatan berpandu Joomla 6 dan PoW Captcha.</item>
+			<item>&quot;baharu&quot; instead of &quot;baru&quot; for new in the site language file, &quot;Pemalam&quot; instead of &quot;Plugin&quot; in plugin descriptions, &quot;penerangan&quot; in sample data.</item>
+			<item>&quot;Pembalut&quot; for the Wrapper component (same as the module), &quot;Skema&quot; in the Schema.org plugin, &quot;Sistem - HTTP Headers&quot; plugin name (HTTP Headers stays untranslated as en-GB requires).</item>
+		</fix>
+		<addition>
+			<item>Terjemahan untuk enam kunci en-GB yang diperkenalkan atau belum disertakan dalam Joomla 5.4.11 dan 6.2.1.</item>
+		</addition>
+		<change>
+			<item>Pakej disasarkan kepada Joomla 5.4.11 dan 6.2.1.</item>
+			<item>Pakej binaan tidak lagi menyertakan installation_ms-MY.zip. Client installation dipetakan ke folder installation/, jadi pemasangannya mencipta semula folder itu pada laman produksi.</item>
+			<item>Manifest sumber install.xml menggunakan hak cipta Joomla! Malaysia dan authorUrl penuh.</item>
+		</change>
+		<remove>
+			<item>626 obsolete keys and api/language/ms-MY/lib_joomla.ini. None of them exist in Joomla 5.4.11, 5.4-dev, 6.2.1 or 6.2-dev, including wrong TPL_CASSIOPEIA_POSITION_* duplicates with underscores instead of hyphens.</item>
+		</remove>
+	</changelog>
+	<changelog>
+		<element>pkg_ms-MY</element>
+		<type>package</type>
+		<version>5.4.10.1</version>
+		<fix>
+			<item>JACTION_ADMIN now reads &quot;Konfigurasi ACL &amp; Pilihan&quot; (it was truncated to &quot;Konfigurasi&quot;).</item>
+			<item>Installation password message uses %d like en-GB.</item>
+			<item>Consistent terminology across the pack: &quot;pengatasan&quot; for override, &quot;penerangan&quot; for description, &quot;didaftar masuk&quot; for checked in, &quot;Daftar Masuk&quot; for Check-in.</item>
+			<item>Labels that added words not in the source (e.g. &quot;Fail Audio&quot; → &quot;Audio&quot;, &quot;Hari Relatif&quot; → &quot;Tarikh Relatif&quot;).</item>
+		</fix>
+		<addition>
+			<item>All new strings for Joomla 5.4.10 and 6.2.0. The pack is at 100 % key coverage against 5.4-dev and 6.2-dev.</item>
+			<item>Early translations for strings coming in Joomla 6.2.1: Smart Search ARIA label, Cassiopeia Extended, scheduler orphan filter, keyboard-shortcut timeout and the TOTP QR code alt text.</item>
+			<item>title attributes on links in user action log, privacy and consent messages (Joomla 6.2 accessibility change).</item>
+			<item>Joomla 6 specific overrides (overrides/j6/) for strings whose placeholders differ from Joomla 5, so the uninstall messages show the extension type and name, and accessible media labels show the media type.</item>
+		</addition>
+	</changelog>
+	<changelog>
+		<element>pkg_ms-MY</element>
+		<type>package</type>
+		<version>6.2.0.1</version>
+		<fix>
+			<item>JACTION_ADMIN now reads &quot;Konfigurasi ACL &amp; Pilihan&quot; (it was truncated to &quot;Konfigurasi&quot;).</item>
+			<item>Installation password message uses %d like en-GB.</item>
+			<item>Consistent terminology across the pack: &quot;pengatasan&quot; for override, &quot;penerangan&quot; for description, &quot;didaftar masuk&quot; for checked in, &quot;Daftar Masuk&quot; for Check-in.</item>
+			<item>Labels that added words not in the source (e.g. &quot;Fail Audio&quot; → &quot;Audio&quot;, &quot;Hari Relatif&quot; → &quot;Tarikh Relatif&quot;).</item>
+		</fix>
+		<addition>
+			<item>All new strings for Joomla 5.4.10 and 6.2.0. The pack is at 100 % key coverage against 5.4-dev and 6.2-dev.</item>
+			<item>Early translations for strings coming in Joomla 6.2.1: Smart Search ARIA label, Cassiopeia Extended, scheduler orphan filter, keyboard-shortcut timeout and the TOTP QR code alt text.</item>
+			<item>title attributes on links in user action log, privacy and consent messages (Joomla 6.2 accessibility change).</item>
+			<item>Joomla 6 specific overrides (overrides/j6/) for strings whose placeholders differ from Joomla 5, so the uninstall messages show the extension type and name, and accessible media labels show the media type.</item>
+		</addition>
+	</changelog>
+	<changelog>
+		<element>pkg_ms-MY</element>
+		<type>package</type>
+		<version>5.4.9.2</version>
+		<change>
+			<item>Translation fixes for Joomla 5.4.9 and 6.1.4.</item>
+		</change>
+	</changelog>
+	<changelog>
+		<element>pkg_ms-MY</element>
+		<type>package</type>
+		<version>6.1.4.2</version>
+		<change>
+			<item>Translation fixes for Joomla 5.4.9 and 6.1.4.</item>
+		</change>
+	</changelog>
+	<changelog>
+		<element>pkg_ms-MY</element>
+		<type>package</type>
+		<version>5.4.9.1</version>
+		<change>
+			<item>Malay language pack for Joomla 5.4.9 and 6.1.4.</item>
+		</change>
+	</changelog>
+	<changelog>
+		<element>pkg_ms-MY</element>
+		<type>package</type>
+		<version>6.1.4.1</version>
+		<change>
+			<item>Malay language pack for Joomla 5.4.9 and 6.1.4.</item>
+		</change>
+	</changelog>
+	<changelog>
+		<element>pkg_ms-MY</element>
+		<type>package</type>
+		<version>5.4.8.1</version>
+		<change>
+			<item>Malay language pack for Joomla 5.4.8 and 6.1.3.</item>
+		</change>
+	</changelog>
+	<changelog>
+		<element>pkg_ms-MY</element>
+		<type>package</type>
+		<version>6.1.3.1</version>
+		<change>
+			<item>Malay language pack for Joomla 5.4.8 and 6.1.3.</item>
+		</change>
+	</changelog>
+</changelogs>

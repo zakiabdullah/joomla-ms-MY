@@ -24,8 +24,8 @@ Current enabled targets in `build/build.config.json`:
 
 | Target | Joomla Major | Package Version | Final Artifact |
 |---|---:|---:|---|
-| `j5` | 5 | 5.4.11.1 | `dist/ms-MY_joomla_lang_full_5.4.11v1.zip` |
-| `j6` | 6 | 6.2.1.1 | `dist/ms-MY_joomla_lang_full_6.2.1v1.zip` |
+| `j5` | 5 | 5.4.11.3 | `dist/ms-MY_joomla_lang_full_5.4.11v3.zip` |
+| `j6` | 6 | 6.2.1.3 | `dist/ms-MY_joomla_lang_full_6.2.1v3.zip` |
 
 One translation tree builds both packages. `j5` is the source branch; `j6` is
 generated from it with the Joomla 6 adjustments (`build/make-target-tree.php`).
@@ -77,10 +77,12 @@ php build/check-translation.php --ref=../joomla-cms --target=j6   # parity
 │   ├── prune-obsolete.php           # Remove keys no supported version uses
 │   ├── release-notes.php            # Release body from CHANGELOG.md
 │   ├── make-target-tree.php         # Generate the j6 branch tree from j5
+│   ├── changelog-xml.php            # changelog.xml (Joomla changelog) from CHANGELOG.md
 │   └── bump.php                     # Version bump for both targets
 ├── build.ps1                        # PowerShell dual-target build pipeline
 ├── .github/workflows/               # GitHub Actions CI/CD
 ├── CHANGELOG.md                     # Release history
+├── changelog.xml                    # Generated; shown in Joomla via <changelogurl>
 ├── CONTRIBUTING.md                  # How to contribute (Bahasa Melayu)
 ├── GLOSSARY.md                      # Terminology & style guide
 ├── pkg_ms-MY.xml                    # Package manifest
@@ -146,7 +148,8 @@ php build/prune-obsolete.php --ref=../cms-5.4.10 --ref=../cms-5.4-dev --ref=../c
 # 1. Bump version (both targets)
 php build/bump.php --j5=5.4.11 --j6=6.2.1 --pack=1
 
-# 2. Rename [Unreleased] in CHANGELOG.md to [5.4.11v1], run ./build.ps1, then commit
+# 2. Rename [Unreleased] in CHANGELOG.md to [5.4.11v1], regenerate changelog.xml
+#    (php build/changelog-xml.php), run ./build.ps1, then commit
 git add -A
 git commit -m "Release 5.4.11v1"
 
