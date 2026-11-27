@@ -7,27 +7,18 @@ and the Joomla 6 package.
 
 ## [Unreleased]
 
+## [5.4.11v3] - 2026-11-27
+
+Packages: `ms-MY_joomla_lang_full_5.4.11v3.zip` 5.4.11.3 (Joomla 5.4.11) and
+`ms-MY_joomla_lang_full_6.2.1v3.zip` 6.2.1.3 (Joomla 6.2.1).
+
 ### Added
 - Terjemahan awal untuk 11 kunci baharu Joomla 6.3: pemilih fail, folder, imej dan video
   (`JLIB_FORM_SELECT_*`, `JLIB_FORM_CHANGE_*`), dua ralat jenis menu, dan saiz ubah saiz imej
   mengikut folder (`plg_media-action_resize`). Liputan 100% berbanding `6.3-dev`.
+- Changelog pakej boleh dilihat dalam Joomla: **Sistem → Urus → Sambungan → Changelog**.
 
 ### Changed
-- Release packages use the official language pack names from core-translations, e.g.
-  `ms-MY_joomla_lang_full_5.4.11v1.zip` and `ms-MY_joomla_lang_full_6.2.1v1.zip` instead of
-  `pkg_ms-MY_j5.zip` and `pkg_ms-MY_j6.zip`, so each download shows its version.
-- GitHub Release packages use the repository manifests as they are, like Joomla core-translations
-  does: the Malay package and sub-package descriptions, the same authors and dates. Before, `build.ps1`
-  generated its own manifests (English descriptions, different author). Only `<version>` and
-  `translationlist_<major>` change per target, as in the `j6` branch. The build fails when
-  `pkg_ms-MY.xml` does not list exactly the sub-packages it built.
-- `pkg_ms-MY.xml` has a `<creationDate>`. `build/bump.php` also updates it and the version table in
-  the README.
-- `build/build.config.json` only holds the language tag and the targets; the unused metadata
-  copies are removed.
-
-### Fixed
-- `SHA256SUMS.txt` is written with LF line endings, so `sha256sum -c` works on Linux and macOS.
 - Istilah diseragamkan merentas semua fail (147 baris dalam 34 fail) dan direkodkan dalam GLOSSARY.md:
   - *Associations*: **Perkaitan** (bukan *Persatuan*, yang bermaksud kelab); *dikaitkan*, *berkaitan*.
   - *Featured*: **Ditampilkan** (bukan *Pilihan*, yang juga bermaksud *Options*); *Feature*: **Tampilkan**,
@@ -35,8 +26,27 @@ and the Joomla 6 package.
   - *Hits*: **Tontonan** (bukan *Capaian* / *Jumlah Dilihat*); *Access Levels*: **Tahap Akses**.
   - *Checked out*: **Didaftar Keluar** (bukan *Disemak Keluar*); *Ordering*: **Susunan** (bukan
     *Pengaturan* / *Pengisihan*); *Contact*: **Kenalan**; *Mobile*: **Telefon Bimbit**.
-  - GLOSSARY.md kini menetapkan *Enabled* = **Didayakan**, mengikut penggunaan dalam pek.
-- CI melarang *persatuan*, *disemak keluar*, *pengaturan*, *pengisihan*, *capaian* dan *jumlah dilihat*.
+- Penerangan pakej dan sub-pakej dalam bahasa Melayu, sama seperti pakej rasmi Joomla.
+- Nama fail pakej mengikut pakej bahasa rasmi dan menunjukkan versinya, contohnya
+  `ms-MY_joomla_lang_full_6.2.1v3.zip` (sebelum ini `pkg_ms-MY_j6.zip`).
+
+### Fixed
+- Kemas kini 5.4.11.2 / 6.2.1.2 sentiasa muncul semula selepas dipasang: pakej v2 di
+  downloads.joomla.org mengandungi manifest bertanda 5.4.11.1 / 6.2.1.1. Pakej v3 mempunyai versi
+  yang betul, jadi kemas kini berhenti selepas dipasang.
+- Pakej v2 juga memasang `installation_ms-MY.zip`, yang mencipta semula folder `installation/`
+  pada laman. Pakej v3 hanya mengandungi laman, pentadbir dan API.
+
+### Tooling
+- `build/changelog-xml.php` generates `changelog.xml` (Joomla changelog format) from this file;
+  `pkg_ms-MY.xml` points `<changelogurl>` to it and CI fails when it is out of date.
+- GitHub Release packages use the repository manifests as they are, like Joomla core-translations
+  does. Only `<version>` and `translationlist_<major>` change per target, as in the `j6` branch.
+  The build fails when `pkg_ms-MY.xml` does not list exactly the sub-packages it built.
+- `pkg_ms-MY.xml` has a `<creationDate>`. `build/bump.php` also updates it and the version table in
+  the README. `build/build.config.json` only holds the language tag and the targets.
+- `SHA256SUMS.txt` is written with LF line endings, so `sha256sum -c` works on Linux and macOS.
+- CI bans *persatuan*, *disemak keluar*, *pengaturan*, *pengisihan*, *capaian* and *jumlah dilihat*.
 
 ## [5.4.11v1] - 2026-11-27
 
@@ -128,7 +138,8 @@ Packages: `pkg_ms-MY_j5.zip` 5.4.10.1 (Joomla 5.4.10) and `pkg_ms-MY_j6.zip` 6.2
 ## [5.4.8v1] - 2026-08-21
 - Malay language pack for Joomla 5.4.8 and 6.1.3.
 
-[Unreleased]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.11v1...j5
+[Unreleased]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.11v3...j5
+[5.4.11v3]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.11v1...5.4.11v3
 [5.4.11v1]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.10v1...5.4.11v1
 [5.4.10v1]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.9v2...5.4.10v1
 [5.4.9v2]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.9v1...5.4.9v2
