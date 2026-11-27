@@ -27,7 +27,7 @@ perubahan diterima.
 ### Satu pohon terjemahan, dua versi Joomla
 
 Pohon fail di atas digunakan untuk membina **kedua-dua** pakej
-`pkg_ms-MY_j5.zip` (Joomla 5) dan `pkg_ms-MY_j6.zip` (Joomla 6). Cabang `j5`
+`ms-MY_joomla_lang_full_5.x.yvN.zip` (Joomla 5) dan `ms-MY_joomla_lang_full_6.x.yvN.zip` (Joomla 6). Cabang `j5`
 ialah sumber utama. Cabang `j6` **dijana** daripada `j5` secara automatik: pohon `j5`
 ditambah penyesuaian Joomla 6 (override `overrides/j6/` diaplikasikan, manifest versi 6.x,
 `translationlist_6`, `minimumJoomla` 6.0). **Jangan commit terus ke `j6`.**
