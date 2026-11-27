@@ -7,6 +7,14 @@ and the Joomla 6 package.
 
 ## [Unreleased]
 
+### Changed
+- Release packages use the official language pack names from core-translations, e.g.
+  `ms-MY_joomla_lang_full_5.4.11v1.zip` and `ms-MY_joomla_lang_full_6.2.1v1.zip` instead of
+  `pkg_ms-MY_j5.zip` and `pkg_ms-MY_j6.zip`, so each download shows its version.
+
+### Fixed
+- `SHA256SUMS.txt` is written with LF line endings, so `sha256sum -c` works on Linux and macOS.
+
 ## [5.4.11v1] - 2026-11-27
 
 Packages: `pkg_ms-MY_j5.zip` 5.4.11.1 (Joomla 5.4.11) and `pkg_ms-MY_j6.zip` 6.2.1.1 (Joomla 6.2.1).

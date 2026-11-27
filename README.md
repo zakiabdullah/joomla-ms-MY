@@ -24,8 +24,8 @@ Current enabled targets in `build/build.config.json`:
 
 | Target | Joomla Major | Package Version | Final Artifact |
 |---|---:|---:|---|
-| `j5` | 5 | 5.4.11.1 | `dist/pkg_ms-MY_j5.zip` |
-| `j6` | 6 | 6.2.1.1 | `dist/pkg_ms-MY_j6.zip` |
+| `j5` | 5 | 5.4.11.1 | `dist/ms-MY_joomla_lang_full_5.4.11v1.zip` |
+| `j6` | 6 | 6.2.1.1 | `dist/ms-MY_joomla_lang_full_6.2.1v1.zip` |
 
 One translation tree builds both packages. `j5` is the source branch; `j6` is
 generated from it with the Joomla 6 adjustments (`build/make-target-tree.php`).
@@ -112,8 +112,11 @@ Optional flags:
 Output:
 - `build/joomla5` (staging + sub-packages)
 - `build/joomla6` (staging + sub-packages)
-- `dist/pkg_ms-MY_j5.zip`
-- `dist/pkg_ms-MY_j6.zip`
+- `dist/ms-MY_joomla_lang_full_<5.x.y>v<n>.zip`
+- `dist/ms-MY_joomla_lang_full_<6.x.y>v<n>.zip`
+
+The file names follow the official language packs from core-translations
+(`<tag>_joomla_lang_full_<Joomla version>v<pack>.zip`).
 
 ### Version Bump
 Updates `build/build.config.json`, `pkg_ms-MY.xml` and the source manifests for both targets:

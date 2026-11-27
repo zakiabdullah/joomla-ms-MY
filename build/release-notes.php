@@ -52,9 +52,13 @@ foreach ($config['targets'] as $target) {
 
 foreach ($config['targets'] as $target) {
     if (!empty($target['enabled'])) {
+        // Same file name as build.ps1: 6.2.1.1 => ms-MY_joomla_lang_full_6.2.1v1.zip
+        $parts   = explode('.', (string) $target['packageVersion']);
+        $zipName = sprintf('%s_joomla_lang_full_%s.%s.%sv%s.zip', $config['languageTag'] ?? 'ms-MY', $parts[0], $parts[1], $parts[2], $parts[3] ?? '1');
+
         $targets[] = sprintf(
-            '| `pkg_ms-MY_%s.zip` | Joomla %d.x | %s |',
-            $target['key'],
+            '| `%s` | Joomla %d.x | %s |',
+            $zipName,
             $target['joomlaMajor'],
             $target['packageVersion']
         );
