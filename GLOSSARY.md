@@ -35,6 +35,7 @@ Istilah yang dilarang dikuatkuasakan secara automatik oleh
 | All | Semua | |
 | Archived | Diarkibkan | Kata kerja: *arkibkan* |
 | Article | Artikel | |
+| Association (multilingual) | Perkaitan | Multilingual Associations: *Perkaitan Berbilang Bahasa*; *dikaitkan*. Bukan *persatuan* |
 | Authenticator (app) | Aplikasi pengesah | |
 | Batch | Kelompok | |
 | Browser | Pelayar | |
@@ -42,10 +43,11 @@ Istilah yang dilarang dikuatkuasakan secara automatik oleh
 | Cancel | Batal | |
 | Category | Kategori | |
 | Check-in | Daftar Masuk | *didaftar masuk* |
-| Check-out | Daftar Keluar | |
+| Check-out | Daftar Keluar | *didaftar keluar*, bukan *disemak keluar* |
 | Close | Tutup | |
 | Component | Komponen | |
 | Configure ACL & Options | Konfigurasi ACL & Pilihan | |
+| Contact | Kenalan | Mobile (telefon): *Telefon Bimbit* |
 | Create | Cipta | |
 | Default | Lalai | |
 | Delete | Padam | *dipadam* |
@@ -54,15 +56,15 @@ Istilah yang dilarang dikuatkuasakan secara automatik oleh
 | Download | Muat turun | |
 | Edit | Sunting | Bukan *edit* |
 | Email | E-mel | |
-| Enabled | Diaktifkan | |
+| Enabled | Didayakan | Kata kerja: *dayakan*. Disabled: *Dilumpuhkan* |
 | Extension | Sambungan | |
-| Featured | Pilihan | |
+| Featured | Ditampilkan | Feature: *Tampilkan*, Unfeature: *Nyahtampil*, Unfeatured: *Tidak Ditampilkan*. Bukan *Pilihan* (= Options) |
 | Field | Medan | Custom Fields: *Medan Tersuai* |
 | File | Fail | |
 | Folder | Folder | |
 | Header (HTTP) | Pengepala | Kekalkan *HTTP Headers* jika en-GB menyatakan *Do not translate* |
 | Help | Bantuan | |
-| Hits | Tontonan | |
+| Hits | Tontonan | Bukan *capaian* atau *jumlah dilihat* |
 | Install | Pasang | |
 | Language | Bahasa | |
 | Layout | Susun Atur | |
@@ -73,7 +75,7 @@ Istilah yang dilarang dikuatkuasakan secara automatik oleh
 | New | Baharu | |
 | Note | Nota | |
 | Options | Pilihan | |
-| Ordering | Susunan | |
+| Ordering | Susunan | Bukan *pengaturan* atau *pengisihan* |
 | Orphaned | Yatim | |
 | Override | Pengatasan | Bahasa dan templat |
 | Password | Kata Laluan | |
