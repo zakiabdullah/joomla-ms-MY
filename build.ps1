@@ -65,16 +65,6 @@ function Get-SourceDate {
     return $script:SourceDate
 }
 
-function Escape-Xml {
-    param([string]$Value)
-
-    if ($null -eq $Value) {
-        return ''
-    }
-
-    return [System.Security.SecurityElement]::Escape($Value)
-}
-
 function Get-RepoRoot {
     if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
         return (Get-Location).Path
@@ -125,115 +115,64 @@ function Read-Xml {
     return $xml
 }
 
-function Get-MetadataFromPackageXml {
-    param([Parameter(Mandatory = $true)][string]$PackageXmlPath)
-
-    $xml = Read-Xml -Path $PackageXmlPath
-
-    return [PSCustomObject]@{
-        LanguageTag     = 'ms-MY'
-        LanguageName    = [string]$xml.extension.name
-        Author          = [string]$xml.extension.author
-        AuthorEmail     = [string]$xml.extension.authorEmail
-        AuthorUrl       = [string]$xml.extension.authorUrl
-        Url             = [string]$xml.extension.url
-        Packager        = [string]$xml.extension.packager
-        PackagerUrl     = [string]$xml.extension.packagerurl
-        Copyright       = [string]$xml.extension.copyright
-        License         = [string]$xml.extension.license
-        PackageBaseName = [string]$xml.extension.packagename
-        BaseVersion     = [string]$xml.extension.version
-        CreationDate    = (Get-SourceDate).ToString('yyyy-MM-dd')
-        MinimumPhp      = '8.1.0'
-    }
-}
-
 function Get-BuildTargets {
+    <#
+    .SYNOPSIS
+    Reads the enabled targets from build/build.config.json.
+
+    .DESCRIPTION
+    Package metadata (names, authors, descriptions) is not configured here: it
+    comes from the repository manifests, which build.ps1 copies as they are.
+    #>
     param(
         [Parameter(Mandatory = $true)][string]$RepoRoot,
-        [Parameter(Mandatory = $true)][string]$PackageXmlPath,
         [Parameter(Mandatory = $true)][string]$ConfigPath
     )
 
-    $metadata = Get-MetadataFromPackageXml -PackageXmlPath $PackageXmlPath
     $resolvedConfigPath = Join-Path $RepoRoot $ConfigPath
 
-    if (Test-Path -Path $resolvedConfigPath) {
-        Write-Log -Level INFO -Message "Using build config: $ConfigPath"
-        $config = Get-Content -Path $resolvedConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    if (-not (Test-Path -Path $resolvedConfigPath)) {
+        throw "Build config not found: $ConfigPath"
+    }
 
-        if (-not $config.targets -or $config.targets.Count -eq 0) {
-            throw "Config file does not define targets: $ConfigPath"
+    Write-Log -Level INFO -Message "Using build config: $ConfigPath"
+    $config = Get-Content -Path $resolvedConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
+
+    if (-not $config.targets -or $config.targets.Count -eq 0) {
+        throw "Config file does not define targets: $ConfigPath"
+    }
+
+    $metadata = [PSCustomObject]@{
+        LanguageTag = if ($config.languageTag) { [string]$config.languageTag } else { 'ms-MY' }
+    }
+
+    $targets = @()
+
+    foreach ($target in $config.targets) {
+        if ($null -ne $target.enabled -and -not [bool]$target.enabled) {
+            continue
         }
 
-        if ($config.languageTag) { $metadata.LanguageTag = [string]$config.languageTag }
-        if ($config.languageName) { $metadata.LanguageName = [string]$config.languageName }
-        if ($config.author) { $metadata.Author = [string]$config.author }
-        if ($config.authorEmail) { $metadata.AuthorEmail = [string]$config.authorEmail }
-        if ($config.authorUrl) { $metadata.AuthorUrl = [string]$config.authorUrl }
-        if ($config.url) { $metadata.Url = [string]$config.url }
-        if ($config.packager) { $metadata.Packager = [string]$config.packager }
-        if ($config.packagerUrl) { $metadata.PackagerUrl = [string]$config.packagerUrl }
-        if ($config.copyright) { $metadata.Copyright = [string]$config.copyright }
-        if ($config.license) { $metadata.License = [string]$config.license }
-        if ($config.packageBaseName) { $metadata.PackageBaseName = [string]$config.packageBaseName }
-        if ($config.minimumPhp) { $metadata.MinimumPhp = [string]$config.minimumPhp }
-
-        $targets = @()
-
-        foreach ($target in $config.targets) {
-            if ($null -ne $target.enabled -and -not [bool]$target.enabled) {
-                continue
-            }
-
-            if (-not $target.key -or -not $target.joomlaMajor -or -not $target.packageVersion) {
-                throw "Invalid target in config. Expected key, joomlaMajor, packageVersion."
-            }
-
-            [void](Get-VersionParts -Version ([string]$target.packageVersion))
-
-            $targets += [PSCustomObject]@{
-                Key            = [string]$target.key
-                JoomlaMajor    = [int]$target.joomlaMajor
-                PackageVersion = [string]$target.packageVersion
-            }
+        if (-not $target.key -or -not $target.joomlaMajor -or -not $target.packageVersion) {
+            throw "Invalid target in config. Expected key, joomlaMajor, packageVersion."
         }
 
-        if ($targets.Count -eq 0) {
-            throw "No enabled targets found in config: $ConfigPath"
-        }
+        [void](Get-VersionParts -Version ([string]$target.packageVersion))
 
-        return [PSCustomObject]@{
-            Metadata = $metadata
-            Targets  = $targets
+        $targets += [PSCustomObject]@{
+            Key            = [string]$target.key
+            JoomlaMajor    = [int]$target.joomlaMajor
+            PackageVersion = [string]$target.packageVersion
         }
     }
 
-    Write-Log -Level WARN -Message "Config file not found ($ConfigPath). Falling back to auto-detection from pkg_ms-MY.xml"
-
-    $baseVersionParts = Get-VersionParts -Version $metadata.BaseVersion
-    $languagePack = $baseVersionParts.Pack
-
-    $j5Version = if ($baseVersionParts.Major -eq 5) {
-        $metadata.BaseVersion
-    }
-    else {
-        "5.4.0.$languagePack"
-    }
-
-    $j6Version = if ($baseVersionParts.Major -eq 6) {
-        $metadata.BaseVersion
-    }
-    else {
-        "6.0.0.$languagePack"
+    if ($targets.Count -eq 0) {
+        throw "No enabled targets found in config: $ConfigPath"
     }
 
     return [PSCustomObject]@{
         Metadata = $metadata
-        Targets  = @(
-            [PSCustomObject]@{ Key = 'j5'; JoomlaMajor = 5; PackageVersion = $j5Version },
-            [PSCustomObject]@{ Key = 'j6'; JoomlaMajor = 6; PackageVersion = $j6Version }
-        )
+        Targets  = $targets
     }
 }
 
@@ -397,155 +336,41 @@ function Apply-TargetOverrides {
         Write-Log -Level INFO -Message "Applied $($overrides.Count) override(s) for $TargetKey to $ContentRoot/$($override.Name)"    }
 }
 
-function New-LanguageInstallManifest {
+function Copy-ManifestForTarget {
+    <#
+    .SYNOPSIS
+    Copies a repository manifest into the build, adjusted for the target.
+
+    .DESCRIPTION
+    Joomla's core-translations project packages the j5 and j6 branches with the
+    manifests from this repository as they are. Building from the same files
+    keeps the GitHub Release packages identical to the official ones. Only the
+    values that differ per target are changed, exactly like
+    build/make-target-tree.php does for the j6 branch: <version> and the
+    translationlist_<major>.xml update server.
+    #>
     param(
-        [Parameter(Mandatory = $true)][string]$OutputPath,
-        [Parameter(Mandatory = $true)][string]$Client,
-        [Parameter(Mandatory = $true)][string]$Tag,
-        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$Source,
+        [Parameter(Mandatory = $true)][string]$Destination,
         [Parameter(Mandatory = $true)][string]$Version,
-        [Parameter(Mandatory = $true)][string]$CreationDate,
-        [Parameter(Mandatory = $true)][string]$Author,
-        [Parameter(Mandatory = $true)][string]$AuthorEmail,
-        [Parameter(Mandatory = $true)][string]$AuthorUrl,
-        [Parameter(Mandatory = $true)][string]$Copyright,
-        [Parameter(Mandatory = $true)][string]$License,
-        [Parameter(Mandatory = $true)][string]$Description,
-        [Parameter(Mandatory = $true)]$RelativeFiles
+        [Parameter(Mandatory = $true)][int]$JoomlaMajor
     )
 
-    $manifest = @(
-        '<?xml version="1.0" encoding="UTF-8"?>',
-        "<extension client=`"$(Escape-Xml $Client)`" type=`"language`" method=`"upgrade`">",
-        "`t<name>$(Escape-Xml $Name)</name>",
-        "`t<tag>$(Escape-Xml $Tag)</tag>",
-        "`t<version>$(Escape-Xml $Version)</version>",
-        "`t<creationDate>$(Escape-Xml $CreationDate)</creationDate>",
-        "`t<author>$(Escape-Xml $Author)</author>",
-        "`t<authorEmail>$(Escape-Xml $AuthorEmail)</authorEmail>",
-        "`t<authorUrl>$(Escape-Xml $AuthorUrl)</authorUrl>",
-        "`t<copyright>$(Escape-Xml $Copyright)</copyright>",
-        "`t<license>$(Escape-Xml $License)</license>",
-        "`t<description>$(Escape-Xml $Description)</description>",
-        "`t<files>",
-        "`t`t<filename file=`"meta`">install.xml</filename>",
-        "`t`t<filename file=`"meta`">langmetadata.xml</filename>",
-        # Joomla language manifests copy the archive's root into the selected
-        # client's language/<tag> directory. Keep files at the ZIP root and
-        # use the same root folder marker as the official en-GB packs.
-        "`t`t<folder>/</folder>"
-    )
-
-    $manifest += @(
-        "`t</files>",
-        "`t<params />",
-        '</extension>'
-    )
-
-    [System.IO.File]::WriteAllText($OutputPath, (($manifest -join "`n") + "`n"), (New-Object System.Text.UTF8Encoding($false)))
-}
-
-function New-LanguageMetadataManifest {
-    param(
-        [Parameter(Mandatory = $true)][string]$OutputPath,
-        [Parameter(Mandatory = $true)][string]$Client,
-        [Parameter(Mandatory = $true)][string]$Name,
-        [Parameter(Mandatory = $true)][string]$Version,
-        [Parameter(Mandatory = $true)][string]$CreationDate,
-        [Parameter(Mandatory = $true)][string]$Author,
-        [Parameter(Mandatory = $true)][string]$AuthorEmail,
-        [Parameter(Mandatory = $true)][string]$AuthorUrl,
-        [Parameter(Mandatory = $true)][string]$Copyright,
-        [Parameter(Mandatory = $true)][string]$License,
-        [Parameter(Mandatory = $true)][string]$Tag
-    )
-
-    $manifest = @(
-        '<?xml version="1.0" encoding="UTF-8"?>',
-        "<metafile client=`"$(Escape-Xml $Client)`">",
-        "`t<name>$(Escape-Xml $Name)</name>",
-        "`t<version>$(Escape-Xml $Version)</version>",
-        "`t<creationDate>$(Escape-Xml $CreationDate)</creationDate>",
-        "`t<author>$(Escape-Xml $Author)</author>",
-        "`t<authorEmail>$(Escape-Xml $AuthorEmail)</authorEmail>",
-        "`t<authorUrl>$(Escape-Xml $AuthorUrl)</authorUrl>",
-        "`t<copyright>$(Escape-Xml $Copyright)</copyright>",
-        "`t<license>$(Escape-Xml $License)</license>",
-        "`t<description><![CDATA[$Tag $Client language]]></description>",
-        "`t<metadata>",
-        "`t`t<name>Malay (Malaysia)</name>",
-        "`t`t<nativeName>Bahasa Melayu (Malaysia)</nativeName>",
-        "`t`t<tag>$(Escape-Xml $Tag)</tag>",
-        "`t`t<rtl>0</rtl>",
-        "`t`t<locale>ms_MY.utf8, ms_MY.UTF-8, ms_MY, msa_MY, ms, malay, bahasa-melayu, malaysia</locale>",
-        "`t`t<firstDay>1</firstDay>",
-        "`t`t<weekEnd>0,6</weekEnd>",
-        "`t`t<calendar>gregorian</calendar>",
-        "`t</metadata>",
-        "`t<params />",
-        '</metafile>'
-    )
-
-    [System.IO.File]::WriteAllText($OutputPath, (($manifest -join "`n") + "`n"), (New-Object System.Text.UTF8Encoding($false)))
-}
-
-function New-PackageManifest {
-    param(
-        [Parameter(Mandatory = $true)][string]$OutputPath,
-        [Parameter(Mandatory = $true)]$Metadata,
-        [Parameter(Mandatory = $true)][int]$JoomlaMajor,
-        [Parameter(Mandatory = $true)][string]$PackageVersion,
-        [Parameter(Mandatory = $true)]$SubPackageDescriptors
-    )
-
-    $fileEntries = @()
-
-    foreach ($descriptor in $SubPackageDescriptors) {
-        $fileEntries += "`t`t<file type=`"language`" client=`"$($descriptor.Client)`" id=`"$($Metadata.LanguageTag)`">$($descriptor.ZipName)</file>"
+    if (-not (Test-Path -Path $Source)) {
+        throw "Required manifest is missing: $Source"
     }
 
-    $description = @"
-<![CDATA[
-        <h2>Malay Language Pack ($(Escape-Xml $Metadata.LanguageTag)) for Joomla! $JoomlaMajor</h2>
-        <h3>Installation / Update</h3>
-        <p>The Malay language pack has been installed successfully. Enable it via <strong>System -> Manage -> Languages</strong>.</p>
-        <h3>Installation Error</h3>
-        <p>If installation fails, download the latest package from <a href="https://github.com/zakiabdullah/joomla-ms-MY/releases" target="_blank">GitHub Releases</a>.</p>
-        <p>Report issues at <a href="https://github.com/zakiabdullah/joomla-ms-MY/issues" target="_blank">GitHub Issues</a>.</p>
-]]>
-"@
+    $content = [System.IO.File]::ReadAllText($Source, [System.Text.Encoding]::UTF8) -replace "`r`n", "`n"
+    $versionPattern = '<version>[^<]*</version>'
 
-    $manifest = @(
-        '<?xml version="1.0" encoding="UTF-8"?>',
-        '<extension type="package" method="upgrade">',
-        "`t<name>$(Escape-Xml $Metadata.LanguageName)</name>",
-        "`t<packagename>$(Escape-Xml $Metadata.PackageBaseName)</packagename>",
-        "`t<version>$(Escape-Xml $PackageVersion)</version>",
-        "`t<creationDate>$(Escape-Xml $Metadata.CreationDate)</creationDate>",
-        "`t<author>$(Escape-Xml $Metadata.Author)</author>",
-        "`t<authorEmail>$(Escape-Xml $Metadata.AuthorEmail)</authorEmail>",
-        "`t<authorUrl>$(Escape-Xml $Metadata.AuthorUrl)</authorUrl>",
-        "`t<url>$(Escape-Xml $Metadata.Url)</url>",
-        "`t<packager>$(Escape-Xml $Metadata.Packager)</packager>",
-        "`t<packagerurl>$(Escape-Xml $Metadata.PackagerUrl)</packagerurl>",
-        "`t<copyright>$(Escape-Xml $Metadata.Copyright)</copyright>",
-        "`t<license>$(Escape-Xml $Metadata.License)</license>",
-        "`t<description>$description</description>",
-        "`t<scriptfile>script.php</scriptfile>",
-        "`t<blockChildUninstall>true</blockChildUninstall>",
-        "`t<files>"
-    )
+    if ([regex]::Matches($content, $versionPattern).Count -ne 1) {
+        throw "Expected exactly one <version> in $Source"
+    }
 
-    $manifest += $fileEntries
-    $manifest += @(
-        "`t</files>",
-        "`t<updateservers>",
-        "`t`t<server type=`"collection`" name=`"Joomla! Update Directory`">https://update.joomla.org/language/translationlist_$JoomlaMajor.xml</server>",
-        "`t</updateservers>",
-        '</extension>'
-    )
+    $content = [regex]::Replace($content, $versionPattern, "<version>$Version</version>")
+    $content = [regex]::Replace($content, 'translationlist_\d+\.xml', "translationlist_$JoomlaMajor.xml")
 
-    [System.IO.File]::WriteAllText($OutputPath, (($manifest -join "`n") + "`n"), (New-Object System.Text.UTF8Encoding($false)))
+    [System.IO.File]::WriteAllText($Destination, $content, (New-Object System.Text.UTF8Encoding($false)))
 }
 
 function Set-ScriptMinimumJoomla {
@@ -652,7 +477,6 @@ function Build-Target {
             SourceRoot  = Join-Path $RepoRoot 'language/ms-MY'
             ContentRoot = 'language/ms-MY'
             ZipName     = 'site_ms-MY.zip'
-            Description = 'Malay (ms-MY) - Site'
         },
         [PSCustomObject]@{
             Name        = 'admin'
@@ -660,7 +484,6 @@ function Build-Target {
             SourceRoot  = Join-Path $RepoRoot 'administrator/language/ms-MY'
             ContentRoot = 'administrator/language/ms-MY'
             ZipName     = 'admin_ms-MY.zip'
-            Description = 'Malay (ms-MY) - Administrator'
         },
         [PSCustomObject]@{
             Name        = 'api'
@@ -668,7 +491,6 @@ function Build-Target {
             SourceRoot  = Join-Path $RepoRoot 'api/language/ms-MY'
             ContentRoot = 'api/language/ms-MY'
             ZipName     = 'api_ms-MY.zip'
-            Description = 'Malay (ms-MY) - API'
         }
         # installation/language/ms-MY is deliberately not packaged: client
         # "installation" maps to JPATH_INSTALLATION, so installing it on a live
@@ -711,33 +533,13 @@ function Build-Target {
         $installXmlPath = Join-Path $subBuildRoot 'install.xml'
         $metaXmlPath = Join-Path $subBuildRoot 'langmetadata.xml'
 
-        New-LanguageInstallManifest `
-            -OutputPath $installXmlPath `
-            -Client $sub.Client `
-            -Tag $Metadata.LanguageTag `
-            -Name "Malay ($($Metadata.LanguageTag))" `
-            -Version $Target.PackageVersion `
-            -CreationDate $Metadata.CreationDate `
-            -Author $Metadata.Author `
-            -AuthorEmail $Metadata.AuthorEmail `
-            -AuthorUrl $Metadata.AuthorUrl `
-            -Copyright $Metadata.Copyright `
-            -License $Metadata.License `
-            -Description $sub.Description `
-            -RelativeFiles ($sourceFiles.Relative)
-
-        New-LanguageMetadataManifest `
-            -OutputPath $metaXmlPath `
-            -Client $sub.Client `
-            -Name "Malay ($($Metadata.LanguageTag))" `
-            -Version $Target.PackageVersion `
-            -CreationDate $Metadata.CreationDate `
-            -Author $Metadata.Author `
-            -AuthorEmail $Metadata.AuthorEmail `
-            -AuthorUrl $Metadata.AuthorUrl `
-            -Copyright $Metadata.Copyright `
-            -License $Metadata.License `
-            -Tag $Metadata.LanguageTag
+        foreach ($manifest in @(@($installXmlPath, 'install.xml'), @($metaXmlPath, 'langmetadata.xml'))) {
+            Copy-ManifestForTarget `
+                -Source (Join-Path $sub.SourceRoot $manifest[1]) `
+                -Destination $manifest[0] `
+                -Version $Target.PackageVersion `
+                -JoomlaMajor $Target.JoomlaMajor
+        }
 
         if ($DoValidation) {
             Validate-XmlFile -Path $installXmlPath
@@ -774,12 +576,19 @@ function Build-Target {
 
     $packageManifestPath = Join-Path $pkgRoot 'pkg_ms-MY.xml'
 
-    New-PackageManifest `
-        -OutputPath $packageManifestPath `
-        -Metadata $Metadata `
-        -JoomlaMajor $Target.JoomlaMajor `
-        -PackageVersion $Target.PackageVersion `
-        -SubPackageDescriptors $builtSubPackages
+    Copy-ManifestForTarget `
+        -Source (Join-Path $RepoRoot 'pkg_ms-MY.xml') `
+        -Destination $packageManifestPath `
+        -Version $Target.PackageVersion `
+        -JoomlaMajor $Target.JoomlaMajor
+
+    # The repository manifest must list exactly the sub-packages that were built
+    $listed = @(([xml](Get-Content -Path $packageManifestPath -Raw -Encoding UTF8)).extension.files.file | ForEach-Object { [string]$_.'#text' } | Sort-Object)
+    $built = @($builtSubPackages.ZipName | Sort-Object)
+
+    if (($listed -join ',') -ne ($built -join ',')) {
+        throw "pkg_ms-MY.xml lists [$($listed -join ', ')] but the build produced [$($built -join ', ')]"
+    }
 
     Set-ScriptMinimumJoomla `
         -SourcePath (Join-Path $RepoRoot 'script.php') `
@@ -806,7 +615,6 @@ function Build-Target {
 }
 
 $repoRoot = Get-RepoRoot
-$pkgXmlPath = Join-Path $repoRoot 'pkg_ms-MY.xml'
 $distRoot = Join-Path $repoRoot 'dist'
 
 Push-Location $repoRoot
@@ -827,7 +635,7 @@ try {
         exit 0
     }
 
-    $plan = Get-BuildTargets -RepoRoot $repoRoot -PackageXmlPath $pkgXmlPath -ConfigPath $ConfigPath
+    $plan = Get-BuildTargets -RepoRoot $repoRoot -ConfigPath $ConfigPath
     $doValidation = -not $SkipValidation
 
     foreach ($target in $plan.Targets) {

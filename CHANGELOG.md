@@ -11,6 +11,15 @@ and the Joomla 6 package.
 - Release packages use the official language pack names from core-translations, e.g.
   `ms-MY_joomla_lang_full_5.4.11v1.zip` and `ms-MY_joomla_lang_full_6.2.1v1.zip` instead of
   `pkg_ms-MY_j5.zip` and `pkg_ms-MY_j6.zip`, so each download shows its version.
+- GitHub Release packages use the repository manifests as they are, like Joomla core-translations
+  does: the Malay package and sub-package descriptions, the same authors and dates. Before, `build.ps1`
+  generated its own manifests (English descriptions, different author). Only `<version>` and
+  `translationlist_<major>` change per target, as in the `j6` branch. The build fails when
+  `pkg_ms-MY.xml` does not list exactly the sub-packages it built.
+- `pkg_ms-MY.xml` has a `<creationDate>`. `build/bump.php` also updates it and the version table in
+  the README.
+- `build/build.config.json` only holds the language tag and the targets; the unused metadata
+  copies are removed.
 
 ### Fixed
 - `SHA256SUMS.txt` is written with LF line endings, so `sha256sum -c` works on Linux and macOS.

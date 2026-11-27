@@ -105,7 +105,9 @@ php build/check-translation.php --ref=../joomla-cms --target=j6   # parity
 ```
 
 Optional flags:
-- `-ConfigPath` points to a JSON config with target versions and metadata
+- `-ConfigPath` points to a JSON config with the target versions; package metadata comes from
+  `pkg_ms-MY.xml` and the `install.xml` / `langmetadata.xml` manifests, which are packaged as they are
+  (only `<version>` and `translationlist_<major>` change per target, as in the `j6` branch)
 - `-CleanOnly` removes `build/joomla5`, `build/joomla6`, and `dist` then exits
 - `-SkipValidation` skips XML parse and non-empty zip checks
 
