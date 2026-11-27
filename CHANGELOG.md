@@ -7,6 +7,10 @@ and the Joomla 6 package.
 
 ## [Unreleased]
 
+## [5.4.11v1] - 2026-11-27
+
+Packages: `pkg_ms-MY_j5.zip` 5.4.11.1 (Joomla 5.4.11) and `pkg_ms-MY_j6.zip` 6.2.1.1 (Joomla 6.2.1).
+
 ### Added
 - Terjemahan untuk enam kunci en-GB yang diperkenalkan atau belum disertakan dalam Joomla 5.4.11 dan 6.2.1.
 
@@ -93,7 +97,8 @@ Packages: `pkg_ms-MY_j5.zip` 5.4.10.1 (Joomla 5.4.10) and `pkg_ms-MY_j6.zip` 6.2
 ## [5.4.8v1] - 2026-08-21
 - Malay language pack for Joomla 5.4.8 and 6.1.3.
 
-[Unreleased]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.10v1...j5
+[Unreleased]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.11v1...j5
+[5.4.11v1]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.10v1...5.4.11v1
 [5.4.10v1]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.9v2...5.4.10v1
 [5.4.9v2]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.9v1...5.4.9v2
 [5.4.9v1]: https://github.com/zakiabdullah/joomla-ms-MY/compare/5.4.8v1...5.4.9v1
