@@ -244,7 +244,7 @@ function Get-RelativeUnixPath {
     )
 
     $relative = [System.IO.Path]::GetRelativePath($BasePath, $FullPath)
-    return $relative.Replace('\\', '/')
+    return $relative.Replace('\', '/')
 }
 
 function Test-SafeRelativePath {
@@ -340,6 +340,9 @@ function Apply-TargetOverrides {
     overrides/<target key>/<content root>/<file>.ini. Each KEY="value" line
     there replaces the same key in the staged file, or is appended when the
     key does not exist yet.
+
+    Step 1 of build/make-target-tree.php applies the same rules when it
+    generates the j6 branch; keep the two implementations in sync.
     #>
     param(
         [Parameter(Mandatory = $true)][string]$RepoRoot,
@@ -391,8 +394,7 @@ function Apply-TargetOverrides {
         }
 
         [System.IO.File]::WriteAllText($stagedFile, (($lines -join "`n") + "`n"), $utf8NoBom)
-        Write-Log -Level INFO -Message "Applied $($overrides.Count) override(s) for $TargetKey to $ContentRoot/$($override.Name)"
-    }
+        Write-Log -Level INFO -Message "Applied $($overrides.Count) override(s) for $TargetKey to $ContentRoot/$($override.Name)"    }
 }
 
 function New-LanguageInstallManifest {
@@ -409,7 +411,6 @@ function New-LanguageInstallManifest {
         [Parameter(Mandatory = $true)][string]$Copyright,
         [Parameter(Mandatory = $true)][string]$License,
         [Parameter(Mandatory = $true)][string]$Description,
-        [Parameter(Mandatory = $true)][string]$ContentFolder,
         [Parameter(Mandatory = $true)]$RelativeFiles
     )
 
@@ -429,7 +430,10 @@ function New-LanguageInstallManifest {
         "`t<files>",
         "`t`t<filename file=`"meta`">install.xml</filename>",
         "`t`t<filename file=`"meta`">langmetadata.xml</filename>",
-        "`t`t<folder>$(Escape-Xml ($ContentFolder.Split('/')[0]))</folder>"
+        # Joomla language manifests copy the archive's root into the selected
+        # client's language/<tag> directory. Keep files at the ZIP root and
+        # use the same root folder marker as the official en-GB packs.
+        "`t`t<folder>/</folder>"
     )
 
     $manifest += @(
@@ -665,15 +669,11 @@ function Build-Target {
             ContentRoot = 'api/language/ms-MY'
             ZipName     = 'api_ms-MY.zip'
             Description = 'Malay (ms-MY) - API'
-        },
-        [PSCustomObject]@{
-            Name        = 'installation'
-            Client      = 'installation'
-            SourceRoot  = Join-Path $RepoRoot 'installation/language/ms-MY'
-            ContentRoot = 'installation/language/ms-MY'
-            ZipName     = 'installation_ms-MY.zip'
-            Description = 'Malay (ms-MY) - Installation'
         }
+        # installation/language/ms-MY is deliberately not packaged: client
+        # "installation" maps to JPATH_INSTALLATION, so installing it on a live
+        # site would recreate the installation/ folder. Those files reach users
+        # through the Joomla core installer (core-translations), like en-GB.
     )
 
     $builtSubPackages = @()
@@ -692,7 +692,10 @@ function Build-Target {
         }
 
         $subBuildRoot = Join-Path $targetBuildRoot $sub.Name
-        $subContentRoot = Join-Path $subBuildRoot ($sub.ContentRoot -replace '/', [System.IO.Path]::DirectorySeparatorChar)
+        # A language sub-package contains the language files at its archive
+        # root; the installer maps that root to language/<tag>,
+        # administrator/language/<tag>, or api/language/<tag> from `client`.
+        $subContentRoot = $subBuildRoot
 
         Ensure-Directory -Path $subBuildRoot
         Ensure-Directory -Path $subContentRoot
@@ -721,7 +724,6 @@ function Build-Target {
             -Copyright $Metadata.Copyright `
             -License $Metadata.License `
             -Description $sub.Description `
-            -ContentFolder $sub.ContentRoot `
             -RelativeFiles ($sourceFiles.Relative)
 
         New-LanguageMetadataManifest `
