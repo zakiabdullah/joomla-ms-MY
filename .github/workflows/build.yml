@@ -48,9 +48,11 @@ jobs:
           foreach ($zip in $zips) {
             if ($zip.Length -le 0) { throw "Empty artifact: $($zip.Name)" }
           }
-          $zips | Get-FileHash -Algorithm SHA256 |
-            ForEach-Object { "{0}  {1}" -f $_.Hash.ToLower(), (Split-Path $_.Path -Leaf) } |
-            Set-Content -Path dist/SHA256SUMS.txt -Encoding utf8NoBOM
+          # LF line endings so `sha256sum -c SHA256SUMS.txt` works on Linux and macOS
+          # (Set-Content on the Windows runner would write CRLF)
+          $lines = $zips | Get-FileHash -Algorithm SHA256 |
+            ForEach-Object { "{0}  {1}" -f $_.Hash.ToLower(), (Split-Path $_.Path -Leaf) }
+          [System.IO.File]::WriteAllText("$PWD/dist/SHA256SUMS.txt", (($lines -join "`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
           Get-Content dist/SHA256SUMS.txt
 
       - name: Upload j5 package
