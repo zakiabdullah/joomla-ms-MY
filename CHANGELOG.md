@@ -23,7 +23,7 @@ and the Joomla 6 package.
 
 ### Fixed
 - `SHA256SUMS.txt` is written with LF line endings, so `sha256sum -c` works on Linux and macOS.
-- Istilah diseragamkan merentas semua fail (154 baris) dan direkodkan dalam GLOSSARY.md:
+- Istilah diseragamkan merentas semua fail (147 baris dalam 34 fail) dan direkodkan dalam GLOSSARY.md:
   - *Associations*: **Perkaitan** (bukan *Persatuan*, yang bermaksud kelab); *dikaitkan*, *berkaitan*.
   - *Featured*: **Ditampilkan** (bukan *Pilihan*, yang juga bermaksud *Options*); *Feature*: **Tampilkan**,
     *Unfeature*: **Nyahtampil**, *Unfeatured*: **Tidak Ditampilkan**.
