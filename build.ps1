@@ -790,7 +790,10 @@ function Build-Target {
         Validate-XmlFile -Path $packageManifestPath
     }
 
-    $finalZipName = "pkg_ms-MY_$($Target.Key).zip"
+    # Same naming as the official language packs from core-translations,
+    # e.g. ms-MY_joomla_lang_full_6.2.1v1.zip for package version 6.2.1.1
+    $versionParts = Get-VersionParts -Version $Target.PackageVersion
+    $finalZipName = '{0}_joomla_lang_full_{1}.{2}.{3}v{4}.zip' -f $Metadata.LanguageTag, $versionParts.Major, $versionParts.Minor, $versionParts.Patch, $versionParts.Pack
     $finalZipPath = Join-Path $DistRoot $finalZipName
 
     Compress-FolderContent -SourceFolder $pkgRoot -ZipPath $finalZipPath
