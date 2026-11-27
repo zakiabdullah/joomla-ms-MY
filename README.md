@@ -24,8 +24,8 @@ Current enabled targets in `build/build.config.json`:
 
 | Target | Joomla Major | Package Version | Final Artifact |
 |---|---:|---:|---|
-| `j5` | 5 | 5.4.10.1 | `dist/pkg_ms-MY_j5.zip` |
-| `j6` | 6 | 6.2.0.1 | `dist/pkg_ms-MY_j6.zip` |
+| `j5` | 5 | 5.4.11.1 | `dist/pkg_ms-MY_j5.zip` |
+| `j6` | 6 | 6.2.1.1 | `dist/pkg_ms-MY_j6.zip` |
 
 One translation tree builds both packages. `j5` is the source branch; `j6` is
 generated from it with the Joomla 6 adjustments (`build/make-target-tree.php`).
@@ -130,7 +130,8 @@ php build/prune-obsolete.php --ref=../cms-5.4.10 --ref=../cms-5.4-dev --ref=../c
 ## CI/CD Workflow
 
 ### GitHub Actions
-- **Push / PR to `j5`/`j6`**: runs Translation QA, builds both packages and uploads them as artifacts.
+- **Push / PR to `j5`**: runs Translation QA, builds both packages and uploads them as artifacts,
+  then regenerates the `j6` branch from `j5` (never commit to `j6` directly).
 - **New tag**: builds both packages and creates a GitHub Release with `SHA256SUMS.txt`.
 - **Weekly sync check**: compares the translation with Joomla `5.4-dev`, `6.2-dev`
   and the next minor branch, and reports new strings to translate.
